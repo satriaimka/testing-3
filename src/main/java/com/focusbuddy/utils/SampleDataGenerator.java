@@ -8,30 +8,38 @@ import java.time.LocalDate;
 
 public class SampleDataGenerator {
     
-    private static void cleanupOrphanedTasks(Connection conn, int demoUserId) throws SQLException {
-        // First, get all tasks that belong to non-existent users
-        String findOrphanedQuery = """
-            SELECT t.id 
-            FROM tasks t 
-            LEFT JOIN users u ON t.user_id = u.id 
-            WHERE u.id IS NULL OR t.user_id = 1
-        """;
+    private static void cleanupOrphanedData(Connection conn, int demoUserId) throws SQLException {
+        // Tables to clean up
+        String[] tables = {"tasks", "mood_entries", "focus_sessions", "notes", "goals"};
         
-        PreparedStatement findStmt = conn.prepareStatement(findOrphanedQuery);
-        ResultSet orphanedTasks = findStmt.executeQuery();
-        
-        // Update orphaned tasks to belong to demo user
-        if (orphanedTasks.next()) {
-            String updateQuery = "UPDATE tasks SET user_id = ? WHERE id = ?";
-            PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
+        for (String table : tables) {
+            // Find orphaned records
+            String findOrphanedQuery = String.format("""
+                SELECT t.id 
+                FROM %s t 
+                LEFT JOIN users u ON t.user_id = u.id 
+                WHERE u.id IS NULL OR t.user_id = 1
+                """, table);
             
-            do {
-                updateStmt.setInt(1, demoUserId);
-                updateStmt.setInt(2, orphanedTasks.getInt("id"));
-                updateStmt.executeUpdate();
-            } while (orphanedTasks.next());
+            PreparedStatement findStmt = conn.prepareStatement(findOrphanedQuery);
+            ResultSet orphanedRecords = findStmt.executeQuery();
             
-            System.out.println("✅ Orphaned tasks have been reassigned to demo user");
+            // Update orphaned records to belong to demo user
+            if (orphanedRecords.next()) {
+                String updateQuery = String.format("UPDATE %s SET user_id = ? WHERE id = ?", table);
+                PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
+                
+                int count = 0;
+                do {
+                    updateStmt.setInt(1, demoUserId);
+                    updateStmt.setInt(2, orphanedRecords.getInt("id"));
+                    updateStmt.executeUpdate();
+                    count++;
+                } while (orphanedRecords.next());
+                
+                System.out.printf("✅ %d orphaned %s have been reassigned to demo user%n", 
+                    count, table);
+            }
         }
     }
 
@@ -62,8 +70,8 @@ public class SampleDataGenerator {
                 demoUserId = rs.getInt("id");
             }
             
-            // Clean up any orphaned tasks and assign them to demo user
-            cleanupOrphanedTasks(conn, demoUserId);
+            // Clean up any orphaned data and assign them to demo user
+            cleanupOrphanedData(conn, demoUserId);
             
             // Check if demo user already has sample tasks
             String checkTasksQuery = "SELECT COUNT(*) FROM tasks WHERE user_id = ?";
