@@ -35,15 +35,25 @@ public class GoalsController {
     
     @FXML
     private void initialize() {
-        goalsService = new GoalsService();
-        
-        setupGoalsList();
-        setupComboBox();
-        setupButtons();
-        setupSpinner();
-        loadGoals();
-        loadStatistics();
-        loadAchievements();
+        try {
+            goalsService = new GoalsService();
+            
+            // Start with clean stats
+            clearGoalsStats();
+            
+            setupGoalsList();
+            setupComboBox();
+            setupButtons();
+            setupSpinner();
+            
+            // Load actual data if any exists
+            loadGoals();
+            loadStatistics();
+            loadAchievements();
+        } catch (Exception e) {
+            System.err.println("Error initializing goals controller: " + e.getMessage());
+            clearGoalsStats(); // Ensure clean state on error
+        }
     }
     
     private void setupGoalsList() {
@@ -215,6 +225,27 @@ public class GoalsController {
         });
     }
     
+    private void clearGoalsStats() {
+        // Clear statistics
+        if (totalGoalsLabel != null) totalGoalsLabel.setText("No goals yet");
+        if (completedGoalsLabel != null) completedGoalsLabel.setText("No completed goals");
+        if (activeGoalsLabel != null) activeGoalsLabel.setText("No active goals");
+        
+        // Clear achievements
+        if (achievementsContainer != null) {
+            achievementsContainer.getChildren().clear();
+            Label emptyLabel = new Label("Complete goals to earn achievements!");
+            emptyLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px; -fx-padding: 20;");
+            achievementsContainer.getChildren().add(emptyLabel);
+        }
+        
+        // Clear goals list
+        if (goalsList != null) {
+            goalsList.getItems().clear();
+            goalsList.setPlaceholder(new Label("Create your first goal to get started!"));
+        }
+    }
+
     private void loadStatistics() {
         int userId = UserSession.getInstance().getCurrentUser().getId();
         
@@ -222,9 +253,13 @@ public class GoalsController {
         int completedGoals = goalsService.getCompletedGoalsCount(userId);
         int activeGoals = goalsService.getActiveGoalsCount(userId);
         
-        totalGoalsLabel.setText("Total Goals: " + totalGoals);
-        completedGoalsLabel.setText("Completed: " + completedGoals);
-        activeGoalsLabel.setText("Active: " + activeGoals);
+        if (totalGoals > 0) {
+            totalGoalsLabel.setText("Total Goals: " + totalGoals);
+            completedGoalsLabel.setText("Completed: " + completedGoals);
+            activeGoalsLabel.setText("Active: " + activeGoals);
+        } else {
+            clearGoalsStats();
+        }
     }
     
     private void loadAchievements() {
@@ -233,11 +268,17 @@ public class GoalsController {
         int userId = UserSession.getInstance().getCurrentUser().getId();
         List<String> achievements = goalsService.getUserAchievements(userId);
         
-        for (String achievement : achievements) {
-            Label achievementLabel = new Label("🏆 " + achievement);
-            achievementLabel.setStyle("-fx-font-size: 14px; -fx-padding: 5px; " +
-                                    "-fx-background-color: #fff3cd; -fx-background-radius: 5px;");
-            achievementsContainer.getChildren().add(achievementLabel);
+        if (!achievements.isEmpty()) {
+            for (String achievement : achievements) {
+                Label achievementLabel = new Label("🏆 " + achievement);
+                achievementLabel.setStyle("-fx-font-size: 14px; -fx-padding: 5px; " +
+                                        "-fx-background-color: #fff3cd; -fx-background-radius: 5px;");
+                achievementsContainer.getChildren().add(achievementLabel);
+            }
+        } else {
+            Label emptyLabel = new Label("Complete goals to earn achievements!");
+            emptyLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px; -fx-padding: 20;");
+            achievementsContainer.getChildren().add(emptyLabel);
         }
     }
 }
