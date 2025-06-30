@@ -374,9 +374,10 @@ public class LoginController {
                         
                         for (String table : tables) {
                             String deleteQuery = "DELETE FROM " + table + " WHERE user_id = ?";
-                            PreparedStatement stmt = conn.prepareStatement(deleteQuery);
-                            stmt.setInt(1, user.getId());
-                            stmt.executeUpdate();
+                            PreparedStatement cleanupStmt = conn.prepareStatement(deleteQuery);
+                            cleanupStmt.setInt(1, user.getId());
+                            cleanupStmt.executeUpdate();
+                            cleanupStmt.close();
                         }
                         
                         // Re-enable foreign key checks
