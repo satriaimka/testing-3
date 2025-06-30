@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # FocusBuddy - Productivity Assistant
 
 A comprehensive JavaFX desktop application designed to help students manage their productivity through task management, mood tracking, note-taking, goal setting, and Pomodoro timer functionality.
@@ -132,3 +133,7 @@ This project is licensed under the MIT License.
 ## Support
 
 For support or questions, please create an issue in the repository.
+=======
+# testing-3
+project pbo
+>>>>>>> f91d21dc04c6402f3795ebda05eab518fce07018
