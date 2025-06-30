@@ -544,6 +544,11 @@ public class DashboardController {
         }
     }
 
+    @FXML private Label productivityLabel;
+    @FXML private Label streakLabel;
+    @FXML private Label goalsProgressLabel;
+    @FXML private Label moodAverageLabel;
+
     private void loadDashboardDataSafely() {
         if (tasksList == null || taskService == null) {
             System.out.println("⚠️ Tasks list or service not available, skipping tasks load");
@@ -551,12 +556,12 @@ public class DashboardController {
         }
 
         try {
+            int userId = UserSession.getInstance().getCurrentUser().getId();
+
             // Load data asynchronously to avoid blocking UI
             CompletableFuture.supplyAsync(() -> {
                 try {
-                    return taskService.getTasksForUser(
-                            UserSession.getInstance().getCurrentUser().getId()
-                    );
+                    return taskService.getTasksForUser(userId);
                 } catch (Exception e) {
                     System.err.println("Error loading tasks: " + e.getMessage());
                     return List.<Task>of(); // Return empty list as fallback
@@ -566,6 +571,21 @@ public class DashboardController {
                     try {
                         updateTasksList(todayTasks);
                         updateStatistics(todayTasks);
+                        
+                        // Update productivity insights with empty state for new users
+                        if (productivityLabel != null) {
+                            productivityLabel.setText("Start tasks to see efficiency");
+                        }
+                        if (streakLabel != null) {
+                            streakLabel.setText("0 days");
+                        }
+                        if (goalsProgressLabel != null) {
+                            goalsProgressLabel.setText("No goals set");
+                        }
+                        if (moodAverageLabel != null) {
+                            moodAverageLabel.setText("No mood entries");
+                        }
+                        
                         System.out.println("✅ Dashboard data loaded successfully");
                     } catch (Exception e) {
                         System.err.println("Error updating dashboard data: " + e.getMessage());
@@ -586,7 +606,7 @@ public class DashboardController {
 
             // Show only first 5 tasks or empty state
             if (tasks.isEmpty()) {
-                Label emptyLabel = new Label("No tasks for today. Great job! 🎉");
+                Label emptyLabel = new Label("No tasks yet. Create your first task to get started!");
                 emptyLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px; -fx-padding: 20;");
                 tasksList.getChildren().add(emptyLabel);
             } else {
@@ -752,17 +772,22 @@ public class DashboardController {
 
     private void updateStatistics(List<Task> tasks) {
         try {
+            // Get completed tasks count
             long completedTasks = tasks.stream()
                     .filter(task -> task.getStatus() == Task.Status.COMPLETED)
                     .count();
 
             if (tasksCompletedLabel != null) {
-                tasksCompletedLabel.setText(completedTasks + " completed");
+                if (completedTasks > 0) {
+                    tasksCompletedLabel.setText(completedTasks + " completed");
+                } else {
+                    tasksCompletedLabel.setText("No completed tasks yet");
+                }
             }
 
+            // Focus time should be empty for new users
             if (focusTimeLabel != null) {
-                // This would come from actual focus sessions in a real implementation
-                focusTimeLabel.setText("4h 30m today");
+                focusTimeLabel.setText("No focus time recorded");
             }
         } catch (Exception e) {
             System.err.println("Error updating statistics: " + e.getMessage());
