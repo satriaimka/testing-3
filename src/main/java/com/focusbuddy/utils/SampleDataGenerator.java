@@ -8,6 +8,33 @@ import java.time.LocalDate;
 
 public class SampleDataGenerator {
     
+    private static void cleanupOrphanedTasks(Connection conn, int demoUserId) throws SQLException {
+        // First, get all tasks that belong to non-existent users
+        String findOrphanedQuery = """
+            SELECT t.id 
+            FROM tasks t 
+            LEFT JOIN users u ON t.user_id = u.id 
+            WHERE u.id IS NULL OR t.user_id = 1
+        """;
+        
+        PreparedStatement findStmt = conn.prepareStatement(findOrphanedQuery);
+        ResultSet orphanedTasks = findStmt.executeQuery();
+        
+        // Update orphaned tasks to belong to demo user
+        if (orphanedTasks.next()) {
+            String updateQuery = "UPDATE tasks SET user_id = ? WHERE id = ?";
+            PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
+            
+            do {
+                updateStmt.setInt(1, demoUserId);
+                updateStmt.setInt(2, orphanedTasks.getInt("id"));
+                updateStmt.executeUpdate();
+            } while (orphanedTasks.next());
+            
+            System.out.println("✅ Orphaned tasks have been reassigned to demo user");
+        }
+    }
+
     public static void generateSampleData() {
         try (Connection conn = DatabaseManager.getInstance().getConnection()) {
             // First, check if demo user exists and get their ID
@@ -34,6 +61,9 @@ public class SampleDataGenerator {
             } else {
                 demoUserId = rs.getInt("id");
             }
+            
+            // Clean up any orphaned tasks and assign them to demo user
+            cleanupOrphanedTasks(conn, demoUserId);
             
             // Check if demo user already has sample tasks
             String checkTasksQuery = "SELECT COUNT(*) FROM tasks WHERE user_id = ?";
