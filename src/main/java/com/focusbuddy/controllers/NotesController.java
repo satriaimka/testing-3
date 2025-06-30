@@ -58,6 +58,9 @@ public class NotesController {
         try {
             notesService = new NotesService();
 
+            // Start with clean state
+            clearNotesState();
+
             setupNotesList();
             setupButtons();
             setupSearch();
@@ -66,6 +69,7 @@ public class NotesController {
             setupKeyboardShortcuts();
             setupWordCount();
 
+            // Load actual data if any exists
             loadNotes();
 
             // Add entrance animation
@@ -75,6 +79,7 @@ public class NotesController {
         } catch (Exception e) {
             ErrorHandler.handleError("Notes Initialization",
                     "Failed to initialize notes view", e);
+            clearNotesState(); // Ensure clean state on error
         }
     }
 
@@ -571,6 +576,39 @@ public class NotesController {
         }
     }
 
+    private void clearNotesState() {
+        // Clear notes list
+        if (notesList != null) {
+            notesList.getItems().clear();
+            Label emptyLabel = new Label("No notes yet. Create your first note to get started!");
+            emptyLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px; -fx-padding: 20;");
+            notesList.setPlaceholder(emptyLabel);
+        }
+
+        // Clear editor
+        if (noteEditor != null) {
+            noteEditor.setHtmlText("");
+        }
+
+        // Clear fields
+        if (noteTitleField != null) {
+            noteTitleField.clear();
+        }
+        if (tagsField != null) {
+            tagsField.clear();
+        }
+
+        // Reset word count
+        if (wordCountLabel != null) {
+            wordCountLabel.setText("Words: 0 | Characters: 0");
+        }
+
+        // Reset last saved label
+        if (lastSavedLabel != null) {
+            lastSavedLabel.setText("No changes to save");
+        }
+    }
+
     private void loadNotes() {
         if (notesService == null) {
             System.err.println("Notes service not available");
@@ -578,6 +616,9 @@ public class NotesController {
         }
 
         try {
+            // Start with clean state
+            clearNotesState();
+
             // Load notes asynchronously
             CompletableFuture.supplyAsync(() -> {
                 try {
@@ -591,11 +632,15 @@ public class NotesController {
                 Platform.runLater(() -> {
                     try {
                         if (notesList != null) {
-                            notesList.getItems().setAll(notes);
-                            System.out.println("✅ Notes loaded successfully: " + notes.size() + " notes");
+                            if (!notes.isEmpty()) {
+                                notesList.getItems().setAll(notes);
+                                System.out.println("✅ Notes loaded successfully: " + notes.size() + " notes");
+                            }
+                            // Empty state is already set by clearNotesState()
                         }
                     } catch (Exception e) {
                         ErrorHandler.handleError("Notes Loading", "Failed to display loaded notes", e);
+                        clearNotesState(); // Ensure clean state on error
                     }
                 });
             });
