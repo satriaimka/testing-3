@@ -608,10 +608,6 @@ public class DashboardController {
         if (efficiencyLabel != null) efficiencyLabel.setText("--");
         if (todayProgressLabel != null) todayProgressLabel.setText("No progress yet");
         if (recentActivityLabel != null) recentActivityLabel.setText("No recent activity");
-
-        } catch (Exception e) {
-            ErrorHandler.handleError("Data Loading", "Failed to load dashboard data", e);
-        }
     }
 
     private void updateTasksList(List<Task> tasks) {
