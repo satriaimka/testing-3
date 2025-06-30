@@ -11,18 +11,41 @@ public class SampleDataGenerator {
     
     public static void generateSampleData() {
         try (Connection conn = DatabaseManager.getInstance().getConnection()) {
+            // First, check if demo user exists and get their ID
+            String checkDemoQuery = "SELECT id FROM users WHERE username = 'demo'";
+            PreparedStatement checkStmt = conn.prepareStatement(checkDemoQuery);
+            ResultSet rs = checkStmt.executeQuery();
             
-            // Create sample user if not exists
-            String userQuery = "INSERT IGNORE INTO users (username, password, email, full_name) VALUES (?, ?, ?, ?)";
-            PreparedStatement userStmt = conn.prepareStatement(userQuery);
-            userStmt.setString(1, "demo");
-            userStmt.setString(2, "demo123");
-            userStmt.setString(3, "demo@focusbuddy.com");
-            userStmt.setString(4, "Demo User");
-            userStmt.executeUpdate();
+            int demoUserId;
+            if (!rs.next()) {
+                // Create demo user if not exists
+                String userQuery = "INSERT INTO users (username, password, email, full_name) VALUES (?, ?, ?, ?)";
+                PreparedStatement userStmt = conn.prepareStatement(userQuery, Statement.RETURN_GENERATED_KEYS);
+                userStmt.setString(1, "demo");
+                userStmt.setString(2, "demo123");
+                userStmt.setString(3, "demo@focusbuddy.com");
+                userStmt.setString(4, "Demo User");
+                userStmt.executeUpdate();
+                
+                ResultSet generatedKeys = userStmt.getGeneratedKeys();
+                if (!generatedKeys.next()) {
+                    throw new SQLException("Failed to create demo user");
+                }
+                demoUserId = generatedKeys.getInt(1);
+            } else {
+                demoUserId = rs.getInt("id");
+            }
             
-            // Create sample tasks
-            String[] sampleTasks = {
+            // Check if demo user already has sample tasks
+            String checkTasksQuery = "SELECT COUNT(*) FROM tasks WHERE user_id = ?";
+            PreparedStatement checkTasksStmt = conn.prepareStatement(checkTasksQuery);
+            checkTasksStmt.setInt(1, demoUserId);
+            ResultSet tasksRs = checkTasksStmt.executeQuery();
+            
+            // Only generate sample tasks if demo user has no tasks
+            if (tasksRs.next() && tasksRs.getInt(1) == 0) {
+                // Create sample tasks only for demo user
+                String[] sampleTasks = {
                 "Complete Java OOP Assignment",
                 "Study for Database Exam", 
                 "Prepare Presentation Slides",
@@ -43,18 +66,22 @@ public class SampleDataGenerator {
                 Task.Priority.LOW, Task.Priority.MEDIUM
             };
             
-            String taskQuery = "INSERT IGNORE INTO tasks (user_id, title, description, priority, status, due_date) VALUES (1, ?, ?, ?, 'PENDING', ?)";
-            
-            for (int i = 0; i < sampleTasks.length; i++) {
-                PreparedStatement taskStmt = conn.prepareStatement(taskQuery);
-                taskStmt.setString(1, sampleTasks[i]);
-                taskStmt.setString(2, descriptions[i]);
-                taskStmt.setString(3, priorities[i].name());
-                taskStmt.setDate(4, java.sql.Date.valueOf(LocalDate.now().plusDays(i + 1)));
-                taskStmt.executeUpdate();
+                String taskQuery = "INSERT INTO tasks (user_id, title, description, priority, status, due_date) VALUES (?, ?, ?, ?, 'PENDING', ?)";
+                
+                for (int i = 0; i < sampleTasks.length; i++) {
+                    PreparedStatement taskStmt = conn.prepareStatement(taskQuery);
+                    taskStmt.setInt(1, demoUserId);
+                    taskStmt.setString(2, sampleTasks[i]);
+                    taskStmt.setString(3, descriptions[i]);
+                    taskStmt.setString(4, priorities[i].name());
+                    taskStmt.setDate(5, java.sql.Date.valueOf(LocalDate.now().plusDays(i + 1)));
+                    taskStmt.executeUpdate();
+                }
+                
+                System.out.println("✅ Sample data generated successfully for demo user!");
+            } else {
+                System.out.println("ℹ️ Demo user already has tasks, skipping sample data generation.");
             }
-            
-            System.out.println("Sample data generated successfully!");
             
         } catch (Exception e) {
             System.err.println("Failed to generate sample data: " + e.getMessage());
