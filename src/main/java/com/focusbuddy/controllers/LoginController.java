@@ -360,29 +360,27 @@ public class LoginController {
 
                     // Clean up any existing data for non-demo users
                     if (!user.getUsername().equals("demo")) {
-                        try (Connection conn = DatabaseManager.getInstance().getConnection()) {
-                            // Disable foreign key checks
-                            conn.createStatement().execute("SET FOREIGN_KEY_CHECKS = 0");
-                            
-                            // Delete all data for this user
-                            String[] tables = {
-                                "tasks",
-                                "mood_entries",
-                                "focus_sessions",
-                                "notes",
-                                "goals"
-                            };
-                            
-                            for (String table : tables) {
-                                String deleteQuery = "DELETE FROM " + table + " WHERE user_id = ?";
-                                PreparedStatement stmt = conn.prepareStatement(deleteQuery);
-                                stmt.setInt(1, user.getId());
-                                stmt.executeUpdate();
-                            }
-                            
-                            // Re-enable foreign key checks
-                            conn.createStatement().execute("SET FOREIGN_KEY_CHECKS = 1");
+                        // Disable foreign key checks
+                        conn.createStatement().execute("SET FOREIGN_KEY_CHECKS = 0");
+                        
+                        // Delete all data for this user
+                        String[] tables = {
+                            "tasks",
+                            "mood_entries",
+                            "focus_sessions",
+                            "notes",
+                            "goals"
+                        };
+                        
+                        for (String table : tables) {
+                            String deleteQuery = "DELETE FROM " + table + " WHERE user_id = ?";
+                            PreparedStatement stmt = conn.prepareStatement(deleteQuery);
+                            stmt.setInt(1, user.getId());
+                            stmt.executeUpdate();
                         }
+                        
+                        // Re-enable foreign key checks
+                        conn.createStatement().execute("SET FOREIGN_KEY_CHECKS = 1");
                     }
 
                     Platform.runLater(() -> {
