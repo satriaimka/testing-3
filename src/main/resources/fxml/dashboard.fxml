@@ -39,8 +39,7 @@
             <Region HBox.hgrow="ALWAYS" />
             <HBox alignment="CENTER" spacing="12.0">
                <children>
-                  <!-- Dynamic weather/time label -->
-                  <Label fx:id="weatherLabel" text="🌤️ Good morning!" styleClass="weather-text">
+                  <Label text="🌤️ Good morning!" styleClass="weather-text">
                      <font><Font size="11.0" /></font>
                   </Label>
                   <ToggleButton fx:id="themeToggle" styleClass="theme-toggle" text="☀️" />
@@ -58,7 +57,7 @@
    <left>
       <VBox fx:id="sidebar" prefWidth="220.0" styleClass="sidebar" minWidth="200.0" maxWidth="240.0">
          <children>
-            <!-- User Profile Section with Real Data -->
+            <!-- User Profile Section -->
             <VBox alignment="CENTER" spacing="10.0" styleClass="user-profile-section">
                <children>
                   <StackPane>
@@ -69,12 +68,10 @@
                   </StackPane>
                   <VBox alignment="CENTER" spacing="2.0">
                      <children>
-                        <!-- Real user name from database -->
-                        <Label fx:id="userNameLabel" text="Loading..." styleClass="profile-name">
+                        <Label text="John Doe" styleClass="profile-name">
                            <font><Font name="System Bold" size="12.0" /></font>
                         </Label>
-                        <!-- Dynamic user level based on activity -->
-                        <Label fx:id="userLevelLabel" text="Calculating level..." styleClass="profile-level">
+                        <Label text="Expert Level 🏆" styleClass="profile-level">
                            <font><Font size="10.0" /></font>
                         </Label>
                      </children>
@@ -116,12 +113,11 @@
 
             <Region VBox.vgrow="ALWAYS" />
 
-            <!-- Dynamic Daily Quote Section -->
+            <!-- Daily Quote Section -->
             <VBox spacing="8.0" styleClass="daily-quote-section" alignment="CENTER">
                <children>
                   <Label text="💡" style="-fx-font-size: 16px;" />
-                  <!-- Dynamic quote that changes daily -->
-                  <Label fx:id="dailyQuoteLabel" text="Loading daily inspiration..." styleClass="daily-quote" wrapText="true" textAlignment="CENTER">
+                  <Label text="&quot;Success is the sum of small efforts repeated daily.&quot;" styleClass="daily-quote" wrapText="true" textAlignment="CENTER">
                      <font><Font size="10.0" /></font>
                   </Label>
                </children>
@@ -150,10 +146,10 @@
                <content>
                   <VBox spacing="20.0" fillWidth="true" prefWidth="940.0" maxWidth="1200.0">
                      <children>
-                        <!-- HERO SECTION WITH REAL DATA -->
+                        <!-- HERO SECTION -->
                         <HBox spacing="20.0" alignment="CENTER">
                            <children>
-                              <!-- Real Quick Stats Cards -->
+                              <!-- Quick Stats Cards -->
                               <VBox spacing="12.0" HBox.hgrow="ALWAYS">
                                  <children>
                                     <HBox spacing="15.0">
@@ -163,14 +159,13 @@
                                                 <HBox alignment="CENTER_LEFT" spacing="8.0">
                                                    <children>
                                                       <Label text="✅" style="-fx-font-size: 16px;" />
-                                                      <!-- Real tasks completed count -->
-                                                      <Label fx:id="tasksCompletedLabel" text="Loading..." styleClass="stat-number">
+                                                      <Label fx:id="tasksCompletedLabel" text="8 completed" styleClass="stat-number">
                                                          <font><Font name="System Bold" size="13.0" /></font>
                                                       </Label>
                                                    </children>
                                                 </HBox>
                                                 <Label text="Tasks Today" styleClass="stat-label" />
-                                                <ProgressBar fx:id="tasksProgressBar" progress="0.0" styleClass="stat-progress" prefHeight="4.0" />
+                                                <ProgressBar progress="0.8" styleClass="stat-progress" prefHeight="4.0" />
                                              </children>
                                           </VBox>
 
@@ -179,14 +174,13 @@
                                                 <HBox alignment="CENTER_LEFT" spacing="8.0">
                                                    <children>
                                                       <Label text="🍅" style="-fx-font-size: 16px;" />
-                                                      <!-- Real focus time from database -->
-                                                      <Label fx:id="focusTimeLabel" text="Loading..." styleClass="stat-number">
+                                                      <Label fx:id="focusTimeLabel" text="4h 30m" styleClass="stat-number">
                                                          <font><Font name="System Bold" size="13.0" /></font>
                                                       </Label>
                                                    </children>
                                                 </HBox>
                                                 <Label text="Focus Time" styleClass="stat-label" />
-                                                <ProgressBar fx:id="focusProgressBar" progress="0.0" styleClass="stat-progress" prefHeight="4.0" />
+                                                <ProgressBar progress="0.6" styleClass="stat-progress" prefHeight="4.0" />
                                              </children>
                                           </VBox>
                                        </children>
@@ -199,14 +193,13 @@
                                                 <HBox alignment="CENTER_LEFT" spacing="8.0">
                                                    <children>
                                                       <Label text="🎯" style="-fx-font-size: 16px;" />
-                                                      <!-- Real goals progress from database -->
-                                                      <Label fx:id="goalsProgressLabel" text="0/0" styleClass="stat-number">
+                                                      <Label text="3/5" styleClass="stat-number">
                                                          <font><Font name="System Bold" size="13.0" /></font>
                                                       </Label>
                                                    </children>
                                                 </HBox>
                                                 <Label text="Goals Progress" styleClass="stat-label" />
-                                                <ProgressBar fx:id="goalsProgressBar" progress="0.0" styleClass="stat-progress" prefHeight="4.0" />
+                                                <ProgressBar progress="0.6" styleClass="stat-progress" prefHeight="4.0" />
                                              </children>
                                           </VBox>
 
@@ -215,14 +208,13 @@
                                                 <HBox alignment="CENTER_LEFT" spacing="8.0">
                                                    <children>
                                                       <Label text="😊" style="-fx-font-size: 16px;" />
-                                                      <!-- Real mood average from database -->
-                                                      <Label fx:id="moodAverageLabel" text="0.0/5" styleClass="stat-number">
+                                                      <Label text="4.2/5" styleClass="stat-number">
                                                          <font><Font name="System Bold" size="13.0" /></font>
                                                       </Label>
                                                    </children>
                                                 </HBox>
                                                 <Label text="Mood Average" styleClass="stat-label" />
-                                                <ProgressBar fx:id="moodProgressBar" progress="0.0" styleClass="stat-progress" prefHeight="4.0" />
+                                                <ProgressBar progress="0.84" styleClass="stat-progress" prefHeight="4.0" />
                                              </children>
                                           </VBox>
                                        </children>
@@ -230,7 +222,7 @@
                                  </children>
                               </VBox>
 
-                              <!-- Pomodoro Timer Card (Unchanged) -->
+                              <!-- Pomodoro Timer Card -->
                               <VBox styleClass="timer-card-enhanced" spacing="15.0" prefWidth="240.0">
                                  <children>
                                     <VBox alignment="CENTER" spacing="12.0">
@@ -272,13 +264,13 @@
                            </children>
                         </HBox>
 
-                        <!-- MAIN CONTENT GRID WITH REAL DATA -->
+                        <!-- MAIN CONTENT GRID -->
                         <HBox spacing="20.0" fillHeight="true">
                            <children>
                               <!-- LEFT COLUMN -->
                               <VBox spacing="18.0" HBox.hgrow="ALWAYS">
                                  <children>
-                                    <!-- Today's Tasks with Real Data -->
+                                    <!-- Today's Tasks -->
                                     <VBox styleClass="card-modern" spacing="15.0">
                                        <children>
                                           <HBox alignment="CENTER_LEFT" spacing="12.0">
@@ -292,14 +284,13 @@
                                                    </children>
                                                 </VBox>
                                                 <Region HBox.hgrow="ALWAYS" />
-                                                <Button text="View All" styleClass="link-button" onAction="#showTasks" />
+                                                <Button text="View All" styleClass="link-button" />
                                              </children>
                                           </HBox>
 
-                                          <!-- Real tasks list loaded from database -->
                                           <VBox fx:id="tasksList" spacing="8.0" />
 
-                                          <Button text="+ Add New Task" styleClass="add-button" maxWidth="Infinity" onAction="#showTasks" />
+                                          <Button text="+ Add New Task" styleClass="add-button" maxWidth="Infinity" />
                                        </children>
                                     </VBox>
 
@@ -312,10 +303,10 @@
 
                                           <GridPane hgap="10.0" vgap="10.0">
                                              <children>
-                                                <Button text="📝 New Note" styleClass="quick-action-button" prefWidth="110.0" prefHeight="45.0" GridPane.columnIndex="0" GridPane.rowIndex="0" onAction="#showNotes" />
-                                                <Button text="🎯 Set Goal" styleClass="quick-action-button" prefWidth="110.0" prefHeight="45.0" GridPane.columnIndex="1" GridPane.rowIndex="0" onAction="#showGoals" />
-                                                <Button text="😊 Log Mood" styleClass="quick-action-button" prefWidth="110.0" prefHeight="45.0" GridPane.columnIndex="0" GridPane.rowIndex="1" onAction="#showMoodTracker" />
-                                                <Button text="💾 Export" styleClass="quick-action-button" prefWidth="110.0" prefHeight="45.0" GridPane.columnIndex="1" GridPane.rowIndex="1" onAction="#showExport" />
+                                                <Button text="📝 New Note" styleClass="quick-action-button" prefWidth="110.0" prefHeight="45.0" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                <Button text="🎯 Set Goal" styleClass="quick-action-button" prefWidth="110.0" prefHeight="45.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                                <Button text="😊 Log Mood" styleClass="quick-action-button" prefWidth="110.0" prefHeight="45.0" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                <Button text="💾 Export" styleClass="quick-action-button" prefWidth="110.0" prefHeight="45.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                              </children>
                                           </GridPane>
                                        </children>
@@ -323,10 +314,10 @@
                                  </children>
                               </VBox>
 
-                              <!-- RIGHT COLUMN WITH REAL DATA -->
+                              <!-- RIGHT COLUMN -->
                               <VBox spacing="18.0" prefWidth="280.0">
                                  <children>
-                                    <!-- Real Productivity Insights -->
+                                    <!-- Productivity Insights -->
                                     <VBox styleClass="card-modern" spacing="15.0">
                                        <children>
                                           <HBox alignment="CENTER_LEFT" spacing="8.0">
@@ -345,8 +336,7 @@
                                                       <VBox alignment="CENTER" spacing="3.0">
                                                          <children>
                                                             <Label text="🔥" style="-fx-font-size: 18px;" />
-                                                            <!-- Real streak days from database -->
-                                                            <Label fx:id="streakDaysLabel" text="0 days" styleClass="insight-number" />
+                                                            <Label text="7 days" styleClass="insight-number" />
                                                             <Label text="Streak" styleClass="insight-label" />
                                                          </children>
                                                       </VBox>
@@ -354,8 +344,7 @@
                                                       <VBox alignment="CENTER" spacing="3.0">
                                                          <children>
                                                             <Label text="⚡" style="-fx-font-size: 18px;" />
-                                                            <!-- Real efficiency from database -->
-                                                            <Label fx:id="efficiencyLabel" text="0%" styleClass="insight-number" />
+                                                            <Label text="92%" styleClass="insight-number" />
                                                             <Label text="Efficiency" styleClass="insight-label" />
                                                          </children>
                                                       </VBox>
@@ -370,15 +359,15 @@
                                                       <HBox spacing="8.0" alignment="CENTER_LEFT">
                                                          <children>
                                                             <Label text="Tasks" styleClass="progress-label" />
-                                                            <ProgressBar fx:id="todayTasksProgress" progress="0.0" HBox.hgrow="ALWAYS" styleClass="insight-progress" />
-                                                            <Label fx:id="todayTasksLabel" text="0/0" styleClass="progress-value" />
+                                                            <ProgressBar progress="0.8" HBox.hgrow="ALWAYS" styleClass="insight-progress" />
+                                                            <Label text="8/10" styleClass="progress-value" />
                                                          </children>
                                                       </HBox>
                                                       <HBox spacing="8.0" alignment="CENTER_LEFT">
                                                          <children>
                                                             <Label text="Focus" styleClass="progress-label" />
-                                                            <ProgressBar fx:id="todayFocusProgress" progress="0.0" HBox.hgrow="ALWAYS" styleClass="insight-progress" />
-                                                            <Label fx:id="todayFocusLabel" text="0h" styleClass="progress-value" />
+                                                            <ProgressBar progress="0.6" HBox.hgrow="ALWAYS" styleClass="insight-progress" />
+                                                            <Label text="4.5h" styleClass="progress-value" />
                                                          </children>
                                                       </HBox>
                                                    </children>
@@ -388,7 +377,7 @@
                                        </children>
                                     </VBox>
 
-                                    <!-- Real Recent Activity -->
+                                    <!-- Recent Activity -->
                                     <VBox styleClass="card-modern" spacing="15.0">
                                        <children>
                                           <HBox alignment="CENTER_LEFT" spacing="8.0">
@@ -400,16 +389,49 @@
                                              </children>
                                           </HBox>
 
-                                          <!-- Real activity list loaded from database -->
-                                          <VBox fx:id="recentActivityList" spacing="8.0">
+                                          <VBox spacing="8.0">
                                              <children>
-                                                <Label text="Loading recent activities..." styleClass="activity-title" />
+                                                <HBox spacing="8.0" alignment="CENTER_LEFT" styleClass="activity-item">
+                                                   <children>
+                                                      <Label text="✅" style="-fx-font-size: 12px;" />
+                                                      <VBox spacing="1.0" HBox.hgrow="ALWAYS">
+                                                         <children>
+                                                            <Label text="Completed Java Assignment" styleClass="activity-title" />
+                                                            <Label text="2 minutes ago" styleClass="activity-time" />
+                                                         </children>
+                                                      </VBox>
+                                                   </children>
+                                                </HBox>
+
+                                                <HBox spacing="8.0" alignment="CENTER_LEFT" styleClass="activity-item">
+                                                   <children>
+                                                      <Label text="🍅" style="-fx-font-size: 12px;" />
+                                                      <VBox spacing="1.0" HBox.hgrow="ALWAYS">
+                                                         <children>
+                                                            <Label text="25min focus session" styleClass="activity-title" />
+                                                            <Label text="15 minutes ago" styleClass="activity-time" />
+                                                         </children>
+                                                      </VBox>
+                                                   </children>
+                                                </HBox>
+
+                                                <HBox spacing="8.0" alignment="CENTER_LEFT" styleClass="activity-item">
+                                                   <children>
+                                                      <Label text="😊" style="-fx-font-size: 12px;" />
+                                                      <VBox spacing="1.0" HBox.hgrow="ALWAYS">
+                                                         <children>
+                                                            <Label text="Logged mood: Happy" styleClass="activity-title" />
+                                                            <Label text="1 hour ago" styleClass="activity-time" />
+                                                         </children>
+                                                      </VBox>
+                                                   </children>
+                                                </HBox>
                                              </children>
                                           </VBox>
                                        </children>
                                     </VBox>
 
-                                    <!-- Dynamic Motivational Card -->
+                                    <!-- Motivational Card -->
                                     <VBox styleClass="inspiration-card-enhanced" spacing="12.0">
                                        <children>
                                           <HBox alignment="CENTER" spacing="8.0">
@@ -420,12 +442,11 @@
                                                 </Label>
                                              </children>
                                           </HBox>
-                                          <!-- Dynamic motivational text based on progress -->
-                                          <Label fx:id="motivationalTextLabel" text="Stay focused and keep pushing forward!"
+                                          <Label text="You've completed 80% of today's tasks. Stay focused!"
                                                  styleClass="inspiration-text" wrapText="true" textAlignment="CENTER">
                                              <font><Font size="11.0" /></font>
                                           </Label>
-                                          <Button text="View Achievements" styleClass="inspiration-button" onAction="#showGoals" />
+                                          <Button text="View Achievements" styleClass="inspiration-button" />
                                        </children>
                                     </VBox>
                                  </children>
