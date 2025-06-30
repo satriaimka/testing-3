@@ -30,12 +30,22 @@ public class MoodTrackerController {
     
     @FXML
     private void initialize() {
-        moodService = new MoodService();
-        
-        setupMoodSlider();
-        setupSaveButton();
-        loadMoodData();
-        loadMoodChart();
+        try {
+            moodService = new MoodService();
+            
+            // Start with clean stats
+            clearMoodStats();
+            
+            setupMoodSlider();
+            setupSaveButton();
+            
+            // Load actual data if any exists
+            loadMoodData();
+            loadMoodChart();
+        } catch (Exception e) {
+            System.err.println("Error initializing mood tracker: " + e.getMessage());
+            clearMoodStats(); // Ensure clean state on error
+        }
     }
     
     private void setupMoodSlider() {
@@ -90,11 +100,32 @@ public class MoodTrackerController {
         }
     }
     
+    private void clearMoodStats() {
+        if (averageMoodLabel != null) {
+            averageMoodLabel.setText("No mood entries yet");
+        }
+        if (moodStreakLabel != null) {
+            moodStreakLabel.setText("Start logging moods to build a streak!");
+        }
+        if (moodHistory != null) {
+            moodHistory.getChildren().clear();
+            Label emptyLabel = new Label("No mood history yet. Start tracking your moods!");
+            emptyLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px; -fx-padding: 20;");
+            moodHistory.getChildren().add(emptyLabel);
+        }
+        if (moodChart != null) {
+            moodChart.getData().clear();
+        }
+    }
+
     private void loadMoodData() {
         int userId = UserSession.getInstance().getCurrentUser().getId();
         List<MoodEntry> recentEntries = moodService.getRecentMoodEntries(userId, 7);
         
-        // Update statistics
+        // Start with clean state
+        clearMoodStats();
+        
+        // Update statistics only if there are entries
         if (!recentEntries.isEmpty()) {
             double averageMood = recentEntries.stream()
                 .mapToInt(MoodEntry::getMoodLevel)
@@ -104,11 +135,13 @@ public class MoodTrackerController {
             averageMoodLabel.setText(String.format("Average: %.1f", averageMood));
             
             int streak = moodService.getMoodStreak(userId);
-            moodStreakLabel.setText("Streak: " + streak + " days");
+            if (streak > 0) {
+                moodStreakLabel.setText("Streak: " + streak + " days");
+            }
+            
+            // Update history only if there are entries
+            updateMoodHistory(recentEntries);
         }
-        
-        // Update history
-        updateMoodHistory(recentEntries);
     }
     
     private void updateMoodHistory(List<MoodEntry> entries) {
