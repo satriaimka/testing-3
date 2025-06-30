@@ -3,8 +3,7 @@ package com.focusbuddy.utils;
 import com.focusbuddy.database.DatabaseManager;
 import com.focusbuddy.models.Task;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.*;
 import java.time.LocalDate;
 
 public class SampleDataGenerator {
