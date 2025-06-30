@@ -37,11 +37,42 @@ public class DatabaseManager {
         return currentConnection;
     }
 
+    public void cleanupAllData() {
+        try (Connection conn = getConnection()) {
+            // Disable foreign key checks to allow truncating tables with foreign keys
+            conn.createStatement().execute("SET FOREIGN_KEY_CHECKS = 0");
+            
+            // Truncate all tables except users
+            String[] tables = {
+                "tasks",
+                "mood_entries",
+                "focus_sessions",
+                "notes",
+                "goals"
+            };
+            
+            for (String table : tables) {
+                String truncateQuery = "TRUNCATE TABLE " + table;
+                conn.createStatement().execute(truncateQuery);
+                System.out.println("✅ Cleaned up table: " + table);
+            }
+            
+            // Re-enable foreign key checks
+            conn.createStatement().execute("SET FOREIGN_KEY_CHECKS = 1");
+            
+            System.out.println("✅ All dummy data has been cleaned up!");
+        } catch (SQLException e) {
+            System.err.println("Failed to clean up data: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     public void initializeDatabase() {
         try (Connection conn = getConnection()) {
             createDatabase(conn);
             createTables(conn);
             runMigrations(conn);
+            cleanupAllData(); // Clean up any existing data
             System.out.println("Database initialized successfully!");
         } catch (SQLException e) {
             System.err.println("Database initialization failed: " + e.getMessage());
