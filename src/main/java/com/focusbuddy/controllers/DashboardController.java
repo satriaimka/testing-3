@@ -50,8 +50,17 @@ public class DashboardController {
     @FXML private Button resetTimerBtn;
     @FXML private ProgressBar timerProgress;
     @FXML private VBox tasksList;
+
+    // Dashboard statistics labels - ALL DECLARED HERE
     @FXML private Label tasksCompletedLabel;
     @FXML private Label focusTimeLabel;
+    @FXML private Label productivityLabel;
+    @FXML private Label streakLabel;
+    @FXML private Label goalsProgressLabel;
+    @FXML private Label moodAverageLabel;
+    @FXML private Label efficiencyLabel;
+    @FXML private Label todayProgressLabel;
+    @FXML private Label recentActivityLabel;
 
     private PomodoroTimer pomodoroTimer;
     private TaskService taskService;
@@ -548,16 +557,6 @@ public class DashboardController {
         }
     }
 
-    @FXML private Label tasksCompletedLabel;
-    @FXML private Label focusTimeLabel;
-    @FXML private Label productivityLabel;
-    @FXML private Label streakLabel;
-    @FXML private Label goalsProgressLabel;
-    @FXML private Label moodAverageLabel;
-    @FXML private Label efficiencyLabel;
-    @FXML private Label todayProgressLabel;
-    @FXML private Label recentActivityLabel;
-
     private void loadDashboardDataSafely() {
         if (tasksList == null || taskService == null) {
             System.out.println("⚠️ Tasks list or service not available, skipping tasks load");
@@ -580,10 +579,10 @@ public class DashboardController {
                     try {
                         updateTasksList(todayTasks);
                         updateStatistics(todayTasks);
-                        
+
                         // Clear all statistics and insights for new users
                         clearDashboardStats();
-                        
+
                         System.out.println("✅ Dashboard data loaded successfully");
                     } catch (Exception e) {
                         System.err.println("Error updating dashboard data: " + e.getMessage());
@@ -599,7 +598,7 @@ public class DashboardController {
         // Tasks
         if (tasksCompletedLabel != null) tasksCompletedLabel.setText("No tasks completed");
         if (focusTimeLabel != null) focusTimeLabel.setText("No focus time recorded");
-        
+
         // Productivity Insights
         if (productivityLabel != null) productivityLabel.setText("Start tasks to see efficiency");
         if (streakLabel != null) streakLabel.setText("No active streak");
