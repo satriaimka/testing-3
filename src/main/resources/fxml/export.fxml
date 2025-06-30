@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.focusbuddy.controllers.ExportController">
+   <children>
+      <!-- Header -->
+      <HBox alignment="CENTER_LEFT">
+         <children>
+            <Label styleClass="card-title" text="Export & Backup">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+      
+      <!-- Export Options -->
+      <VBox styleClass="card" spacing="15.0">
+         <children>
+            <Label styleClass="card-title" text="Export Data">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            
+            <VBox spacing="10.0">
+               <children>
+                  <Label text="Select export location:" />
+                  <HBox spacing="10.0">
+                     <children>
+                        <TextField fx:id="exportPathField" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="browseButton" styleClass="secondary-button" text="Browse..." />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            
+            <VBox spacing="10.0">
+               <children>
+                  <Label text="Select data to export:" />
+                  <VBox spacing="5.0">
+                     <children>
+                        <CheckBox fx:id="includeTasksCheckBox" text="Tasks" />
+                        <CheckBox fx:id="includeMoodCheckBox" text="Mood Entries" />
+                        <CheckBox fx:id="includeNotesCheckBox" text="Notes" />
+                        <CheckBox fx:id="includeGoalsCheckBox" text="Goals" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+            
+            <HBox spacing="15.0">
+               <children>
+                  <Button fx:id="exportCSVButton" styleClass="primary-button" text="Export to CSV" />
+                  <Button fx:id="backupDatabaseButton" styleClass="secondary-button" text="Backup Database" />
+               </children>
+            </HBox>
+            
+            <ProgressBar fx:id="exportProgress" prefWidth="200.0" visible="false" />
+            <Label fx:id="statusLabel" />
+         </children>
+      </VBox>
+      
+      <!-- Export Information -->
+      <VBox styleClass="card" spacing="15.0">
+         <children>
+            <Label styleClass="card-title" text="Export Information">
+               <font>
+                  <Font name="System Bold" size="16.0" />
+               </font>
+            </Label>
+            
+            <VBox spacing="8.0">
+               <children>
+                  <Label text="• CSV Export: Exports your data in comma-separated values format" />
+                  <Label text="• Database Backup: Creates a complete backup of your database" />
+                  <Label text="• All exports include a summary report with statistics" />
+                  <Label text="• Exported files are timestamped for easy organization" />
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</VBox>

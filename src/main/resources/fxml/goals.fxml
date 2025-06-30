@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<HBox spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.focusbuddy.controllers.GoalsController">
+   <children>
+      <!-- Left Panel - Goals List -->
+      <VBox styleClass="card" spacing="15.0" prefWidth="400.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="card-title" text="Goals">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Label>
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Button fx:id="newGoalButton" styleClass="primary-button" text="+ New Goal" />
+               </children>
+            </HBox>
+            
+            <!-- Statistics -->
+            <VBox spacing="5.0" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;">
+               <children>
+                  <Label fx:id="totalGoalsLabel" text="Total Goals: 0" />
+                  <Label fx:id="completedGoalsLabel" text="Completed: 0" />
+                  <Label fx:id="activeGoalsLabel" text="Active: 0" />
+               </children>
+            </VBox>
+            
+            <ListView fx:id="goalsList" prefHeight="300.0" />
+            
+            <HBox spacing="10.0">
+               <children>
+                  <Button fx:id="deleteGoalButton" styleClass="secondary-button" text="Delete" HBox.hgrow="ALWAYS" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      
+      <!-- Right Panel - Goal Editor & Achievements -->
+      <VBox spacing="15.0" HBox.hgrow="ALWAYS">
+         <children>
+            <!-- Goal Editor -->
+            <VBox styleClass="card" spacing="15.0">
+               <children>
+                  <Label styleClass="card-title" text="Goal Details">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Label>
+                  
+                  <VBox spacing="10.0">
+                     <children>
+                        <VBox spacing="5.0">
+                           <children>
+                              <Label text="Goal Title:" />
+                              <TextField fx:id="goalTitleField" promptText="Enter goal title..." />
+                           </children>
+                        </VBox>
+                        
+                        <VBox spacing="5.0">
+                           <children>
+                              <Label text="Description:" />
+                              <TextArea fx:id="goalDescriptionArea" prefRowCount="3" promptText="Describe your goal..." />
+                           </children>
+                        </VBox>
+                        
+                        <HBox spacing="15.0">
+                           <children>
+                              <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label text="Goal Type:" />
+                                    <ComboBox fx:id="goalTypeCombo" maxWidth="1.7976931348623157E308" />
+                                 </children>
+                              </VBox>
+                              
+                              <VBox spacing="5.0">
+                                 <children>
+                                    <Label text="Target Value:" />
+                                    <Spinner fx:id="targetValueSpinner" prefWidth="100.0" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        
+                        <VBox spacing="5.0">
+                           <children>
+                              <Label text="Target Date:" />
+                              <DatePicker fx:id="targetDatePicker" />
+                           </children>
+                        </VBox>
+                        
+                        <Button fx:id="saveGoalButton" styleClass="primary-button" text="Save Goal" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+            
+            <!-- Achievements -->
+            <VBox fx:id="goalsContainer" styleClass="card" spacing="15.0">
+               <children>
+                  <Label styleClass="card-title" text="Achievements">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Label>
+                  
+                  <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxHeight="200.0">
+                     <content>
+                        <VBox fx:id="achievementsContainer" spacing="8.0" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</HBox>

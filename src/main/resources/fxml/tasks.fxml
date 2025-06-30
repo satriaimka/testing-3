@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<HBox spacing="20.0" stylesheets="@../css/modern-light-theme.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.focusbuddy.controllers.TasksController">
+   <children>
+      <!-- LEFT PANEL - Task List with Enhanced Filters -->
+      <VBox prefWidth="480.0" spacing="16.0" styleClass="card-modern">
+         <children>
+            <!-- Header Section -->
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+               <children>
+                  <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label styleClass="card-title-large" text="My Tasks">
+                           <font><Font name="System Bold" size="20.0" /></font>
+                        </Label>
+                        <Label styleClass="card-subtitle" text="Organize and track your daily tasks" />
+                     </children>
+                  </VBox>
+                  <Button fx:id="newTaskButton" prefHeight="32.0" styleClass="primary-button" text="+ New Task">
+                     <font><Font name="System Bold" size="12.0" /></font>
+                  </Button>
+               </children>
+            </HBox>
+
+            <!-- Statistics Cards -->
+            <GridPane hgap="10.0" styleClass="stats-grid" vgap="10.0">
+               <children>
+                  <VBox alignment="CENTER_LEFT" spacing="4.0" styleClass="stat-card-mini" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="6.0">
+                           <children>
+                              <Label style="-fx-font-size: 14px;" text="📋" />
+                              <Label fx:id="totalTasksLabel" styleClass="stat-number-small" text="0" />
+                           </children>
+                        </HBox>
+                        <Label styleClass="stat-label-small" text="Total Tasks" />
+                     </children>
+                  </VBox>
+
+                  <VBox alignment="CENTER_LEFT" spacing="4.0" styleClass="stat-card-mini" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="6.0">
+                           <children>
+                              <Label style="-fx-font-size: 14px;" text="⏳" />
+                              <Label fx:id="pendingTasksLabel" styleClass="stat-number-small" text="0" />
+                           </children>
+                        </HBox>
+                        <Label styleClass="stat-label-small" text="Pending" />
+                     </children>
+                  </VBox>
+
+                  <VBox alignment="CENTER_LEFT" spacing="4.0" styleClass="stat-card-mini" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="6.0">
+                           <children>
+                              <Label style="-fx-font-size: 14px;" text="✅" />
+                              <Label fx:id="completedTasksLabel" styleClass="stat-number-small" text="0" />
+                           </children>
+                        </HBox>
+                        <Label styleClass="stat-label-small" text="Completed" />
+                     </children>
+                  </VBox>
+
+                  <VBox alignment="CENTER_LEFT" spacing="4.0" styleClass="stat-card-mini" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="6.0">
+                           <children>
+                              <Label style="-fx-font-size: 14px;" text="🚨" />
+                              <Label fx:id="overdueTasksLabel" styleClass="stat-number-small" text="0" />
+                           </children>
+                        </HBox>
+                        <Label styleClass="stat-label-small" text="Overdue" />
+                     </children>
+                  </VBox>
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+            </GridPane>
+
+            <!-- Search and Filters -->
+            <VBox spacing="12.0" styleClass="filters-section">
+               <children>
+                  <!-- Search Bar -->
+                  <VBox spacing="4.0">
+                     <children>
+                        <Label styleClass="field-label-small" text="Search Tasks" />
+                        <TextField fx:id="searchField" promptText="Search by title or description..." styleClass="search-field" />
+                     </children>
+                  </VBox>
+
+                  <!-- Filter Controls -->
+                  <HBox spacing="10.0">
+                     <children>
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label styleClass="field-label-small" text="Priority" />
+                              <ComboBox fx:id="filterPriorityCombo" maxWidth="1.7976931348623157E308" styleClass="filter-combo" />
+                           </children>
+                        </VBox>
+
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label styleClass="field-label-small" text="Status" />
+                              <ComboBox fx:id="filterStatusCombo" maxWidth="1.7976931348623157E308" styleClass="filter-combo" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+
+                  <VBox spacing="4.0">
+                     <children>
+                        <Label styleClass="field-label-small" text="Sort By" />
+                        <ComboBox fx:id="sortCombo" maxWidth="1.7976931348623157E308" styleClass="filter-combo" />
+                     </children>
+                  </VBox>
+
+                  <!-- Options -->
+                  <HBox alignment="CENTER_LEFT" spacing="15.0">
+                     <children>
+                        <CheckBox fx:id="showCompletedCheckBox" styleClass="custom-checkbox" text="Show completed" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label styleClass="tip-text" text="💡 Ctrl+N for new task" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+
+            <!-- Tasks List -->
+            <VBox spacing="8.0" VBox.vgrow="ALWAYS">
+               <children>
+                  <Label styleClass="section-header" text="Task List" />
+                  <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="tasks-scroll-pane" VBox.vgrow="ALWAYS">
+                     <content>
+                        <ListView fx:id="tasksList" styleClass="tasks-list-enhanced" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+
+            <!-- Action Buttons -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Button fx:id="deleteTaskButton" styleClass="danger-button" text="Delete Selected" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Label styleClass="shortcut-help" text="📖 Del to delete" />
+               </children>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+         </padding>
+      </VBox>
+
+      <!-- RIGHT PANEL - Task Editor -->
+      <VBox fx:id="tasksContainer" spacing="20.0" styleClass="card-modern" HBox.hgrow="ALWAYS">
+         <children>
+            <!-- Editor Header -->
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+               <children>
+                  <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label styleClass="card-title-large" text="Task Details">
+                           <font><Font name="System Bold" size="18.0" /></font>
+                        </Label>
+                        <Label styleClass="card-subtitle" text="Create and edit your task information" />
+                     </children>
+                  </VBox>
+                  <Label styleClass="autosave-indicator" text="💾 Auto-save" />
+               </children>
+            </HBox>
+
+            <!-- Task Form -->
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="form-scroll-pane" VBox.vgrow="ALWAYS">
+               <content>
+                  <VBox spacing="16.0">
+                     <children>
+                        <!-- Title Section -->
+                        <VBox spacing="6.0" styleClass="form-section">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px;" text="📝" />
+                                    <Label styleClass="field-label-enhanced" text="Task Title" />
+                                    <Label style="-fx-text-fill: #ef4444; -fx-font-weight: bold;" text="*" />
+                                 </children>
+                              </HBox>
+                              <TextField fx:id="taskTitleField" promptText="Enter a clear and descriptive task title..." styleClass="enhanced-text-field" />
+                              <Label styleClass="field-help" text="Keep it clear and actionable (max 200 characters)" />
+                           </children>
+                        </VBox>
+
+                        <!-- Description Section -->
+                        <VBox spacing="6.0" styleClass="form-section">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px;" text="📄" />
+                                    <Label styleClass="field-label-enhanced" text="Description" />
+                                 </children>
+                              </HBox>
+                              <TextArea fx:id="taskDescriptionArea" prefRowCount="3" promptText="Add detailed description, requirements, or notes..." styleClass="enhanced-text-area" wrapText="true" />
+                              <Label styleClass="field-help" text="Provide context and details to help you complete the task" />
+                           </children>
+                        </VBox>
+
+                        <!-- Priority and Status -->
+                        <HBox spacing="16.0">
+                           <children>
+                              <VBox spacing="6.0" styleClass="form-section" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                       <children>
+                                          <Label style="-fx-font-size: 14px;" text="🎯" />
+                                          <Label styleClass="field-label-enhanced" text="Priority" />
+                                       </children>
+                                    </HBox>
+                                    <ComboBox fx:id="priorityCombo" maxWidth="1.7976931348623157E308" styleClass="enhanced-combo-box" />
+                                    <Label styleClass="field-help" text="🔴 High  🟡 Medium  🟢 Low" />
+                                 </children>
+                              </VBox>
+
+                              <VBox spacing="6.0" styleClass="form-section" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                       <children>
+                                          <Label style="-fx-font-size: 14px;" text="📊" />
+                                          <Label styleClass="field-label-enhanced" text="Status" />
+                                       </children>
+                                    </HBox>
+                                    <ComboBox fx:id="statusCombo" maxWidth="1.7976931348623157E308" styleClass="enhanced-combo-box" />
+                                    <Label styleClass="field-help" text="Track your progress" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+
+                        <!-- Due Date -->
+                        <VBox spacing="6.0" styleClass="form-section">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px;" text="📅" />
+                                    <Label styleClass="field-label-enhanced" text="Due Date" />
+                                    <Label styleClass="optional-label" text="(Optional)" />
+                                 </children>
+                              </HBox>
+                              <DatePicker fx:id="dueDatePicker" prefWidth="200.0" styleClass="enhanced-date-picker" />
+                              <Label styleClass="field-help" text="Set a deadline to stay focused and organized" />
+                           </children>
+                        </VBox>
+
+                        <!-- Action Buttons -->
+                        <VBox spacing="12.0" styleClass="action-section">
+                           <children>
+                              <Separator />
+
+                              <HBox alignment="CENTER" spacing="15.0">
+                                 <children>
+                                    <Button fx:id="saveTaskButton" prefWidth="130.0" styleClass="primary-button-large" text="Save Task">
+                                       <font><Font name="System Bold" size="13.0" /></font>
+                                    </Button>
+
+                                    <VBox alignment="CENTER_LEFT" spacing="4.0">
+                                       <children>
+                                          <Label styleClass="tips-header" text="💡 Quick Tips" />
+                                          <Label styleClass="tip-item" text="• Use specific action words in titles" />
+                                          <Label styleClass="tip-item" text="• Set realistic due dates" />
+                                          <Label styleClass="tip-item" text="• Break large tasks into smaller ones" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+
+                        <!-- Productivity Insights -->
+                        <VBox spacing="10.0" styleClass="insights-section">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                 <children>
+                                    <Label style="-fx-font-size: 14px;" text="📈" />
+                                    <Label styleClass="section-header" text="Productivity Insights" />
+                                 </children>
+                              </HBox>
+
+                              <GridPane hgap="12.0" styleClass="insights-grid" vgap="8.0">
+                                 <children>
+                                    <VBox alignment="CENTER" spacing="3.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                       <children>
+                                          <Label style="-fx-font-size: 18px;" text="🔥" />
+                                          <Label styleClass="insight-number-small" text="7 days" />
+                                          <Label styleClass="insight-label-small" text="Current Streak" />
+                                       </children>
+                                    </VBox>
+
+                                    <VBox alignment="CENTER" spacing="3.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                       <children>
+                                          <Label style="-fx-font-size: 18px;" text="⚡" />
+                                          <Label styleClass="insight-number-small" text="85%" />
+                                          <Label styleClass="insight-label-small" text="Completion Rate" />
+                                       </children>
+                                    </VBox>
+
+                                    <VBox alignment="CENTER" spacing="3.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                       <children>
+                                          <Label style="-fx-font-size: 18px;" text="🎯" />
+                                          <Label styleClass="insight-number-small" text="3.2 hrs" />
+                                          <Label styleClass="insight-label-small" text="Avg. Focus Time" />
+                                       </children>
+                                    </VBox>
+
+                                    <VBox alignment="CENTER" spacing="3.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <children>
+                                          <Label style="-fx-font-size: 18px;" text="🏆" />
+                                          <Label styleClass="insight-number-small" text="12" />
+                                          <Label styleClass="insight-label-small" text="This Week" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                              </GridPane>
+                           </children>
+                        </VBox>
+                     </children>
+                     <padding><Insets bottom="16.0" left="4.0" right="4.0" top="4.0" /></padding>
+                  </VBox>
+               </content>
+            </ScrollPane>
+         </children>
+         <padding>
+            <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+         </padding>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</HBox>

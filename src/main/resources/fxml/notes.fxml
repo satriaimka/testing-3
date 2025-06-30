@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.web.HTMLEditor?>
+
+<HBox spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.focusbuddy.controllers.NotesController">
+   <children>
+      <!-- LEFT SIDEBAR - Notes List -->
+      <VBox styleClass="notes-sidebar" spacing="20.0" prefWidth="320.0" minWidth="300.0" maxWidth="400.0">
+         <children>
+            <!-- Header Section -->
+            <VBox spacing="10.0" styleClass="sidebar-header">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="15.0">
+                     <children>
+                        <Label text="📝 My Notes" styleClass="sidebar-title">
+                           <font><Font name="System Bold" size="20.0" /></font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="newNoteButton" styleClass="new-note-btn" text="+ New" prefWidth="70.0" prefHeight="32.0">
+                           <font><Font name="System Bold" size="11.0" /></font>
+                        </Button>
+                     </children>
+                  </HBox>
+
+                  <Label text="Organize your thoughts and ideas" styleClass="sidebar-subtitle">
+                     <font><Font size="12.0" /></font>
+                  </Label>
+               </children>
+            </VBox>
+
+            <!-- Search Section -->
+            <VBox spacing="8.0" styleClass="search-section">
+               <children>
+                  <TextField fx:id="searchField" styleClass="search-input" promptText="🔍 Search notes..." prefHeight="35.0">
+                     <font><Font size="13.0" /></font>
+                  </TextField>
+
+                  <!-- Filter Buttons -->
+                  <HBox spacing="8.0" alignment="CENTER_LEFT">
+                     <children>
+                        <Button text="All" styleClass="filter-btn-active" prefHeight="25.0" />
+                        <Button text="Work" styleClass="filter-btn" prefHeight="25.0" />
+                        <Button text="Personal" styleClass="filter-btn" prefHeight="25.0" />
+                        <ComboBox fx:id="sortCombo" styleClass="sort-dropdown" prefWidth="90.0" prefHeight="25.0" promptText="Sort" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+
+            <!-- Notes List -->
+            <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+               <children>
+                  <Label text="Notes" styleClass="section-label">
+                     <font><Font name="System Bold" size="13.0" /></font>
+                  </Label>
+
+                  <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" styleClass="notes-list-scroll">
+                     <content>
+                        <ListView fx:id="notesList" styleClass="notes-list" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+
+            <!-- Action Buttons -->
+            <HBox spacing="10.0" alignment="CENTER" styleClass="action-buttons">
+               <children>
+                  <Button fx:id="deleteNoteButton" styleClass="delete-btn" text="🗑️" prefWidth="35.0" prefHeight="35.0" />
+                  <Button fx:id="exportButton" styleClass="export-btn" text="📤" prefWidth="35.0" prefHeight="35.0" />
+                  <Button fx:id="importButton" styleClass="import-btn" text="📥" prefWidth="35.0" prefHeight="35.0" />
+               </children>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="15.0" top="20.0" />
+         </padding>
+      </VBox>
+
+      <!-- MAIN EDITOR AREA WITH SCROLL -->
+      <ScrollPane fitToWidth="true" hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED" HBox.hgrow="ALWAYS">
+         <content>
+            <VBox fx:id="notesContainer" styleClass="editor-container" spacing="20.0" minWidth="500.0" prefWidth="600.0">
+               <children>
+                  <!-- Editor Header -->
+                  <VBox spacing="15.0" styleClass="editor-header">
+                     <children>
+                        <!-- Top Bar -->
+                        <HBox alignment="CENTER_LEFT" spacing="15.0">
+                           <children>
+                              <Label text="✏️ Note Editor" styleClass="editor-title">
+                                 <font><Font name="System Bold" size="18.0" /></font>
+                              </Label>
+                              <Region HBox.hgrow="ALWAYS" />
+                              <Label fx:id="lastSavedLabel" text="Auto-save enabled" styleClass="save-status">
+                                 <font><Font size="11.0" /></font>
+                              </Label>
+                              <Button fx:id="saveNoteButton" styleClass="save-btn" text="💾 Save" prefWidth="80.0" prefHeight="35.0">
+                                 <font><Font name="System Bold" size="12.0" /></font>
+                              </Button>
+                           </children>
+                        </HBox>
+
+                        <!-- Note Info Section -->
+                        <VBox spacing="12.0" styleClass="note-info-section">
+                           <children>
+                              <!-- Title Input -->
+                              <VBox spacing="5.0">
+                                 <children>
+                                    <Label text="Title" styleClass="input-label">
+                                       <font><Font name="System Bold" size="12.0" /></font>
+                                    </Label>
+                                    <TextField fx:id="noteTitleField" styleClass="title-input" promptText="Enter your note title..." prefHeight="40.0">
+                                       <font><Font name="System Bold" size="15.0" /></font>
+                                    </TextField>
+                                 </children>
+                              </VBox>
+
+                              <!-- Tags and Category Row -->
+                              <HBox spacing="15.0">
+                                 <children>
+                                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label text="Tags" styleClass="input-label">
+                                             <font><Font name="System Bold" size="12.0" /></font>
+                                          </Label>
+                                          <TextField fx:id="tagsField" styleClass="tags-input" promptText="work, important, ideas..." prefHeight="35.0">
+                                             <font><Font size="13.0" /></font>
+                                          </TextField>
+                                       </children>
+                                    </VBox>
+
+                                    <VBox spacing="5.0" prefWidth="150.0">
+                                       <children>
+                                          <Label text="Category" styleClass="input-label">
+                                             <font><Font name="System Bold" size="12.0" /></font>
+                                          </Label>
+                                          <ComboBox fx:id="categoryCombo" styleClass="category-dropdown" prefWidth="150.0" prefHeight="35.0" promptText="General" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+
+                  <!-- Separator Line -->
+                  <Separator />
+
+                  <!-- Word Count Info -->
+                  <HBox spacing="15.0" alignment="CENTER_LEFT" styleClass="info-section">
+                     <children>
+                        <Label text="📄 Content" styleClass="section-label">
+                           <font><Font name="System Bold" size="14.0" /></font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="wordCountLabel" text="Words: 0 | Characters: 0" styleClass="word-count">
+                           <font><Font size="11.0" /></font>
+                        </Label>
+                     </children>
+                  </HBox>
+
+                  <!-- MAIN WRITING AREA -->
+                  <VBox spacing="10.0" VBox.vgrow="ALWAYS" styleClass="writing-area">
+                     <children>
+                        <!-- HTML Editor for Writing -->
+                        <VBox VBox.vgrow="ALWAYS" styleClass="editor-wrapper" minHeight="400.0" prefHeight="500.0">
+                           <children>
+                              <HTMLEditor fx:id="noteEditor" styleClass="main-editor" prefHeight="500.0" VBox.vgrow="ALWAYS" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+
+                  <!-- Footer Info -->
+                  <HBox spacing="20.0" alignment="CENTER_LEFT" styleClass="editor-footer">
+                     <children>
+                        <VBox spacing="2.0">
+                           <children>
+                              <Label text="⌨️ Shortcuts:" styleClass="shortcut-header">
+                                 <font><Font name="System Bold" size="10.0" /></font>
+                              </Label>
+                              <Label text="Ctrl+N: New | Ctrl+S: Save | Ctrl+F: Search | Del: Delete" styleClass="shortcut-text">
+                                 <font><Font size="9.0" /></font>
+                              </Label>
+                           </children>
+                        </VBox>
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <VBox spacing="2.0" alignment="CENTER_RIGHT">
+                           <children>
+                              <Label text="✨ Writing Tips:" styleClass="tips-header">
+                                 <font><Font name="System Bold" size="10.0" /></font>
+                              </Label>
+                              <Label text="Keep it organized • Use clear headings • Tag properly" styleClass="tips-text">
+                                 <font><Font size="9.0" /></font>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </VBox>
+         </content>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </ScrollPane>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</HBox>

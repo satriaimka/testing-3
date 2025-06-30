@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox fx:id="moodContainer" spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.focusbuddy.controllers.MoodTrackerController">
+   <children>
+      <!-- Header -->
+      <HBox alignment="CENTER_LEFT">
+         <children>
+            <Label styleClass="card-title" text="Mood Tracker">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+      
+      <!-- Main Content -->
+      <HBox spacing="20.0">
+         <children>
+            <!-- Left Panel - Mood Input -->
+            <VBox styleClass="card" spacing="15.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="card-title" text="How are you feeling today?">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Label>
+                  
+                  <VBox alignment="CENTER" spacing="15.0">
+                     <children>
+                        <Label fx:id="moodEmoji" styleClass="timer-display" text="😐">
+                           <font>
+                              <Font size="48.0" />
+                           </font>
+                        </Label>
+                        
+                        <Label fx:id="moodLabel" text="Neutral">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        
+                        <Slider fx:id="moodSlider" max="5.0" min="1.0" value="3.0" prefWidth="200.0" />
+                        
+                        <VBox spacing="5.0">
+                           <children>
+                              <Label text="Tell us more (optional):" />
+                              <TextArea fx:id="moodDescription" prefRowCount="3" promptText="How was your day? What made you feel this way?" wrapText="true" />
+                           </children>
+                        </VBox>
+                        
+                        <Button fx:id="saveMoodButton" styleClass="primary-button" text="Save Mood" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+            
+            <!-- Right Panel - Statistics -->
+            <VBox spacing="15.0" prefWidth="300.0">
+               <children>
+                  <!-- Quick Stats -->
+                  <VBox styleClass="card" spacing="10.0">
+                     <children>
+                        <Label styleClass="card-title" text="Statistics">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="averageMoodLabel" text="Average: 0.0" />
+                        <Label fx:id="moodStreakLabel" text="Streak: 0 days" />
+                     </children>
+                  </VBox>
+                  
+                  <!-- Recent History -->
+                  <VBox styleClass="card" spacing="10.0">
+                     <children>
+                        <Label styleClass="card-title" text="Recent Entries">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxHeight="200.0">
+                           <content>
+                              <VBox fx:id="moodHistory" spacing="8.0" />
+                           </content>
+                        </ScrollPane>
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      
+      <!-- Mood Chart -->
+      <VBox styleClass="card">
+         <children>
+            <Label styleClass="card-title" text="Mood Trend (Last 30 Days)">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <LineChart fx:id="moodChart" prefHeight="300.0">
+               <xAxis>
+                  <CategoryAxis side="BOTTOM" />
+               </xAxis>
+               <yAxis>
+                  <NumberAxis side="LEFT" lowerBound="1.0" upperBound="5.0" />
+               </yAxis>
+            </LineChart>
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</VBox>
