@@ -61,6 +61,9 @@ public class DashboardController {
     @FXML
     private void initialize() {
         try {
+            // Start with clean stats
+            clearDashboardStats();
+
             // Initialize services safely
             initializeServices();
 
@@ -94,6 +97,7 @@ public class DashboardController {
                 } catch (Exception e) {
                     ErrorHandler.handleError("Dashboard Initialization",
                             "Failed to complete dashboard setup", e);
+                    clearDashboardStats(); // Ensure clean state on error
                 }
             });
 
@@ -544,10 +548,15 @@ public class DashboardController {
         }
     }
 
+    @FXML private Label tasksCompletedLabel;
+    @FXML private Label focusTimeLabel;
     @FXML private Label productivityLabel;
     @FXML private Label streakLabel;
     @FXML private Label goalsProgressLabel;
     @FXML private Label moodAverageLabel;
+    @FXML private Label efficiencyLabel;
+    @FXML private Label todayProgressLabel;
+    @FXML private Label recentActivityLabel;
 
     private void loadDashboardDataSafely() {
         if (tasksList == null || taskService == null) {
@@ -572,19 +581,8 @@ public class DashboardController {
                         updateTasksList(todayTasks);
                         updateStatistics(todayTasks);
                         
-                        // Update productivity insights with empty state for new users
-                        if (productivityLabel != null) {
-                            productivityLabel.setText("Start tasks to see efficiency");
-                        }
-                        if (streakLabel != null) {
-                            streakLabel.setText("0 days");
-                        }
-                        if (goalsProgressLabel != null) {
-                            goalsProgressLabel.setText("No goals set");
-                        }
-                        if (moodAverageLabel != null) {
-                            moodAverageLabel.setText("No mood entries");
-                        }
+                        // Clear all statistics and insights for new users
+                        clearDashboardStats();
                         
                         System.out.println("✅ Dashboard data loaded successfully");
                     } catch (Exception e) {
@@ -592,6 +590,24 @@ public class DashboardController {
                     }
                 });
             });
+        } catch (Exception e) {
+            ErrorHandler.handleError("Dashboard Data", "Failed to load dashboard data", e);
+        }
+    }
+
+    private void clearDashboardStats() {
+        // Tasks
+        if (tasksCompletedLabel != null) tasksCompletedLabel.setText("No tasks completed");
+        if (focusTimeLabel != null) focusTimeLabel.setText("No focus time recorded");
+        
+        // Productivity Insights
+        if (productivityLabel != null) productivityLabel.setText("Start tasks to see efficiency");
+        if (streakLabel != null) streakLabel.setText("No active streak");
+        if (goalsProgressLabel != null) goalsProgressLabel.setText("No goals set");
+        if (moodAverageLabel != null) moodAverageLabel.setText("No mood entries");
+        if (efficiencyLabel != null) efficiencyLabel.setText("--");
+        if (todayProgressLabel != null) todayProgressLabel.setText("No progress yet");
+        if (recentActivityLabel != null) recentActivityLabel.setText("No recent activity");
 
         } catch (Exception e) {
             ErrorHandler.handleError("Data Loading", "Failed to load dashboard data", e);
@@ -772,25 +788,20 @@ public class DashboardController {
 
     private void updateStatistics(List<Task> tasks) {
         try {
-            // Get completed tasks count
+            clearDashboardStats(); // Always start with clean stats
+
+            // Only update stats if there are completed tasks
             long completedTasks = tasks.stream()
                     .filter(task -> task.getStatus() == Task.Status.COMPLETED)
                     .count();
 
-            if (tasksCompletedLabel != null) {
-                if (completedTasks > 0) {
-                    tasksCompletedLabel.setText(completedTasks + " completed");
-                } else {
-                    tasksCompletedLabel.setText("No completed tasks yet");
-                }
+            if (completedTasks > 0 && tasksCompletedLabel != null) {
+                tasksCompletedLabel.setText(completedTasks + " completed");
             }
 
-            // Focus time should be empty for new users
-            if (focusTimeLabel != null) {
-                focusTimeLabel.setText("No focus time recorded");
-            }
         } catch (Exception e) {
             System.err.println("Error updating statistics: " + e.getMessage());
+            clearDashboardStats(); // Ensure clean state on error
         }
     }
 
