@@ -3,12 +3,25 @@ package com.focusbuddy.controllers;
 import com.focusbuddy.models.Goal;
 import com.focusbuddy.models.StudyGoal;
 import com.focusbuddy.models.FocusGoal;
+import com.focusbuddy.models.TaskGoal;
 import com.focusbuddy.services.GoalsService;
+import com.focusbuddy.services.GoalProgressManager;
+import com.focusbuddy.observers.AchievementObserver;
 import com.focusbuddy.utils.NotificationManager;
 import com.focusbuddy.utils.UserSession;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.application.Platform;
+import javafx.animation.PauseTransition;
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
+import javafx.animation.ParallelTransition;
+import javafx.util.Duration;
+import javafx.geometry.Pos;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,26 +45,31 @@ public class GoalsController {
     
     private GoalsService goalsService;
     private Goal currentGoal;
+    private GoalProgressManager goalProgressManager;
+    private AchievementObserver achievementObserver;
 
     @FXML
     private void initialize() {
         try {
             goalsService = new GoalsService();
 
+            // ✅ NEW: Initialize goal progress manager dan observer
+            initializeGoalSystem();
+
             setupGoalsList();
             setupComboBox();
             setupButtons();
             setupSpinner();
 
-            // ✅ UBAH: Load data real, jangan clear
+            // Load data real, jangan clear
             loadGoals();
             loadStatistics();
             loadAchievements();
 
-            System.out.println("✅ Goals controller initialized successfully");
+            System.out.println("✅ Goals controller initialized successfully with auto-progress system");
         } catch (Exception e) {
             System.err.println("Error initializing goals controller: " + e.getMessage());
-            showEmptyState(); // ✅ TAMBAH
+            showEmptyState();
         }
     }
     
@@ -139,30 +157,30 @@ public class GoalsController {
         
         goalsList.getSelectionModel().clearSelection();
     }
-    
+
     private void saveCurrentGoal() {
-        String title = goalTitleField.getText().trim();
-        String description = goalDescriptionArea.getText().trim();
-        Goal.GoalType type = goalTypeCombo.getValue();
-        int targetValue = targetValueSpinner.getValue();
-        LocalDate targetDate = targetDatePicker.getValue();
-        
+        String title = goalTitleField != null ? goalTitleField.getText().trim() : "";
+        String description = goalDescriptionArea != null ? goalDescriptionArea.getText().trim() : "";
+        Goal.GoalType type = goalTypeCombo != null ? goalTypeCombo.getValue() : Goal.GoalType.STUDY_HOURS;
+        int targetValue = targetValueSpinner != null ? targetValueSpinner.getValue() : 10;
+        LocalDate targetDate = targetDatePicker != null ? targetDatePicker.getValue() : LocalDate.now().plusWeeks(1);
+
         if (title.isEmpty()) {
             NotificationManager.getInstance().showNotification(
-                "Validation Error", 
-                "Goal title cannot be empty", 
-                NotificationManager.NotificationType.WARNING
+                    "Validation Error",
+                    "Goal title cannot be empty",
+                    NotificationManager.NotificationType.WARNING
             );
             return;
         }
-        
+
         Goal goal;
         if (currentGoal == null) {
-            // Create new goal based on type
+            // ✅ UPDATED: Create new goal based on type dengan TaskGoal
             goal = switch (type) {
                 case STUDY_HOURS -> new StudyGoal(title, description, targetValue);
                 case FOCUS_SESSIONS -> new FocusGoal(title, description, targetValue);
-                case TASKS_COMPLETED -> new StudyGoal(title, description, targetValue); // Can create TaskGoal class
+                case TASKS_COMPLETED -> new TaskGoal(title, description, targetValue); // ✅ USE TaskGoal
             };
             goal.setUserId(UserSession.getInstance().getCurrentUser().getId());
         } else {
@@ -171,29 +189,52 @@ public class GoalsController {
             goal.setDescription(description);
             goal.setTargetValue(targetValue);
         }
-        
+
         goal.setTargetDate(targetDate);
-        
+
         boolean success;
         if (currentGoal == null) {
             success = goalsService.createGoal(goal);
+
+            // ✅ NEW: Notify goal creation untuk observer
+            if (success && goalProgressManager != null) {
+                try {
+                    // Observer akan otomatis dipanggil dari GoalsService.createGoal()
+                    System.out.println("✅ Goal creation notification sent to observers");
+
+                } catch (Exception e) {
+                    System.err.println("⚠️ Error notifying goal creation: " + e.getMessage());
+                }
+            }
         } else {
             success = goalsService.updateGoal(goal);
         }
-        
+
         if (success) {
+            String action = currentGoal == null ? "created" : "updated";
+            String message = currentGoal == null ?
+                    "Your goal has been created! Start working towards it! 🎯" :
+                    "Your goal has been updated successfully! 📝";
+
             NotificationManager.getInstance().showNotification(
-                "Goal Saved", 
-                "Your goal has been saved successfully!", 
-                NotificationManager.NotificationType.SUCCESS
+                    "Goal " + (currentGoal == null ? "Created" : "Updated"),
+                    message,
+                    NotificationManager.NotificationType.SUCCESS
             );
+
             loadGoals();
             loadStatistics();
+
+            // ✅ NEW: Show goal creation tips untuk new goals
+            if (currentGoal == null) {
+                showGoalCreationTips(goal);
+            }
+
         } else {
             NotificationManager.getInstance().showNotification(
-                "Error", 
-                "Failed to save goal", 
-                NotificationManager.NotificationType.ERROR
+                    "Error",
+                    "Failed to save goal",
+                    NotificationManager.NotificationType.ERROR
             );
         }
     }
@@ -252,36 +293,207 @@ public class GoalsController {
             int activeGoals = goalsService.getActiveGoalsCount(userId);
 
             if (totalGoals > 0) {
+                // ✅ ENHANCED: Show more detailed statistics
                 totalGoalsLabel.setText("Total Goals: " + totalGoals);
-                completedGoalsLabel.setText("Completed: " + completedGoals);
+                completedGoalsLabel.setText("Completed: " + completedGoals + " (" +
+                        String.format("%.0f%%", (double)completedGoals/totalGoals*100) + ")");
                 activeGoalsLabel.setText("Active: " + activeGoals);
+
+                // ✅ NEW: Show goal progress insights
+                showGoalProgressInsights(userId);
+
             } else {
-                // ✅ TAMBAH: Show empty state untuk user baru
                 showEmptyState();
             }
         } catch (Exception e) {
             System.err.println("Error loading statistics: " + e.getMessage());
-            showEmptyState(); // ✅ TAMBAH
+            showEmptyState();
         }
     }
-    
+
     private void loadAchievements() {
         achievementsContainer.getChildren().clear();
-        
+
         int userId = UserSession.getInstance().getCurrentUser().getId();
         List<String> achievements = goalsService.getUserAchievements(userId);
-        
+
         if (!achievements.isEmpty()) {
-            for (String achievement : achievements) {
-                Label achievementLabel = new Label("🏆 " + achievement);
-                achievementLabel.setStyle("-fx-font-size: 14px; -fx-padding: 5px; " +
-                                        "-fx-background-color: #fff3cd; -fx-background-radius: 5px;");
-                achievementsContainer.getChildren().add(achievementLabel);
+            // ✅ ENHANCED: Better achievement display dengan animations
+            for (int i = 0; i < achievements.size(); i++) {
+                String achievement = achievements.get(i);
+
+                HBox achievementItem = createAchievementItem(achievement);
+                achievementsContainer.getChildren().add(achievementItem);
+
+                // Add entrance animation dengan delay
+                addAchievementAnimation(achievementItem, i * 100);
             }
+
+            // ✅ NEW: Add progress summary
+            if (goalProgressManager != null) {
+                try {
+                    double completionRate = goalProgressManager.getGoalCompletionRate(userId);
+                    if (completionRate > 0) {
+                        Label progressSummary = new Label(
+                                String.format("🎯 Overall Progress: %.0f%% completion rate", completionRate)
+                        );
+                        progressSummary.setStyle("-fx-text-fill: #667eea; -fx-font-size: 12px; -fx-padding: 10 5 5 5; -fx-font-weight: bold;");
+                        achievementsContainer.getChildren().add(0, progressSummary);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error adding progress summary: " + e.getMessage());
+                }
+            }
+
         } else {
             Label emptyLabel = new Label("Complete goals to earn achievements!");
             emptyLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px; -fx-padding: 20;");
             achievementsContainer.getChildren().add(emptyLabel);
+        }
+    }
+
+    private HBox createAchievementItem(String achievement) {
+        HBox item = new HBox(8);
+        item.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        item.setStyle("-fx-padding: 8; -fx-background-color: #fff3cd; -fx-background-radius: 8; -fx-border-color: #ffeaa7; -fx-border-radius: 8;");
+
+        Label icon = new Label("🏆");
+        icon.setStyle("-fx-font-size: 14px;");
+
+        Label text = new Label(achievement);
+        text.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
+        text.setWrapText(true);
+
+        item.getChildren().addAll(icon, text);
+        return item;
+    }
+
+    private void addAchievementAnimation(HBox achievementItem, double delayMs) {
+        try {
+            achievementItem.setOpacity(0);
+            achievementItem.setTranslateX(-10);
+
+            PauseTransition delay = new PauseTransition(Duration.millis(delayMs));
+            delay.setOnFinished(e -> {
+                FadeTransition fade = new FadeTransition(Duration.millis(300), achievementItem);
+                fade.setFromValue(0);
+                fade.setToValue(1);
+
+                TranslateTransition slide = new TranslateTransition(Duration.millis(300), achievementItem);
+                slide.setFromX(-10);
+                slide.setToX(0);
+
+                ParallelTransition animation = new ParallelTransition(fade, slide);
+                animation.play();
+            });
+            delay.play();
+        } catch (Exception e) {
+            // Fallback: just show the item
+            achievementItem.setOpacity(1);
+            achievementItem.setTranslateX(0);
+        }
+    }
+
+    private void initializeGoalSystem() {
+        try {
+            // Initialize goal progress manager
+            goalProgressManager = GoalProgressManager.getInstance();
+
+            // Create dan register achievement observer
+            achievementObserver = new AchievementObserver();
+            goalProgressManager.addObserver(achievementObserver);
+
+            System.out.println("✅ Goal progress system initialized with achievement observer");
+
+        } catch (Exception e) {
+            System.err.println("⚠️ Error initializing goal system: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void showGoalCreationTips(Goal goal) {
+        try {
+            String tips = getGoalTypeTips(goal.getGoalType());
+
+            // Show tips in a delayed notification
+            Platform.runLater(() -> {
+                try {
+                    Thread.sleep(2000); // Wait 2 seconds
+
+                    NotificationManager.getInstance().showNotification(
+                            "💡 Goal Tips",
+                            tips,
+                            NotificationManager.NotificationType.INFO
+                    );
+
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+
+        } catch (Exception e) {
+            System.err.println("Error showing goal creation tips: " + e.getMessage());
+        }
+    }
+
+    private String getGoalTypeTips(Goal.GoalType goalType) {
+        return switch (goalType) {
+            case TASKS_COMPLETED ->
+                    "🎯 Task Completion Goal Tips:\n\n" +
+                            "• Your goal will automatically progress when you complete tasks\n" +
+                            "• Focus on marking tasks as 'Completed' in the Tasks section\n" +
+                            "• Break large tasks into smaller, manageable ones\n" +
+                            "• Check your progress regularly to stay motivated!";
+
+            case FOCUS_SESSIONS ->
+                    "🍅 Focus Session Goal Tips:\n\n" +
+                            "• Your goal will automatically progress when you complete Pomodoro sessions\n" +
+                            "• Use the Focus Timer on the dashboard to start sessions\n" +
+                            "• Even 25-minute sessions count towards your goal\n" +
+                            "• Consistency is key - aim for regular focus sessions!";
+
+            case STUDY_HOURS ->
+                    "📚 Study Hours Goal Tips:\n\n" +
+                            "• Your goal will automatically progress based on completed focus sessions\n" +
+                            "• Each 25+ minute focus session counts as 1 hour\n" +
+                            "• Use the Pomodoro timer to track your study time\n" +
+                            "• Quality over quantity - focused study is more effective!";
+        };
+    }
+
+    private void showGoalProgressInsights(int userId) {
+        try {
+            if (goalProgressManager != null) {
+                // Get goal completion rate
+                double completionRate = goalProgressManager.getGoalCompletionRate(userId);
+
+                // Get near completion goals
+                List<Goal> nearCompletionGoals = goalProgressManager.getNearCompletionGoals(userId);
+
+                // Get daily summary
+                String dailySummary = goalProgressManager.getDailyGoalSummary(userId);
+
+                System.out.println("📊 Goal Insights:");
+                System.out.println("   - Completion Rate: " + String.format("%.1f%%", completionRate));
+                System.out.println("   - Near Completion: " + nearCompletionGoals.size() + " goals");
+                System.out.println("   - Daily Summary: " + dailySummary);
+
+                // Could display these insights in UI if needed
+
+            }
+        } catch (Exception e) {
+            System.err.println("Error showing goal progress insights: " + e.getMessage());
+        }
+    }
+
+    public void cleanup() {
+        try {
+            if (goalProgressManager != null && achievementObserver != null) {
+                goalProgressManager.removeObserver(achievementObserver);
+                System.out.println("✅ Goal observer cleaned up successfully");
+            }
+        } catch (Exception e) {
+            System.err.println("Error cleaning up goal observer: " + e.getMessage());
         }
     }
 }

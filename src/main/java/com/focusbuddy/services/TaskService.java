@@ -2,6 +2,7 @@ package com.focusbuddy.services;
 
 import com.focusbuddy.database.DatabaseManager;
 import com.focusbuddy.models.Task;
+import com.focusbuddy.services.GoalProgressManager;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -75,7 +76,6 @@ public class TaskService {
                 stmt.setNull(6, Types.DATE);
             }
 
-            // Set timestamps
             Timestamp now = Timestamp.valueOf(LocalDateTime.now());
             stmt.setTimestamp(7, now);
             stmt.setTimestamp(8, now);
@@ -83,13 +83,23 @@ public class TaskService {
             int rowsAffected = stmt.executeUpdate();
 
             if (rowsAffected > 0) {
-                // Get the generated ID
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         task.setId(generatedKeys.getInt(1));
                     }
                 }
+
                 System.out.println("✅ Task added successfully: " + task.getTitle());
+
+                // ✅ NEW: Notify goal system about new task (for goal tracking)
+                try {
+                    // Could add goal tracking for "tasks created" if needed
+                    // GoalProgressManager.getInstance().onTaskCreated(task.getUserId(), task);
+
+                } catch (Exception e) {
+                    System.err.println("⚠️ Error notifying goal system about new task: " + e.getMessage());
+                }
+
                 return true;
             }
 
@@ -103,6 +113,21 @@ public class TaskService {
 
     public boolean updateTask(Task task) {
         try (Connection conn = DatabaseManager.getInstance().getConnection()) {
+            // Store old status untuk comparison
+            Task.Status oldStatus = null;
+
+            // Get current task dari database untuk compare status
+            String selectQuery = "SELECT status FROM tasks WHERE id = ?";
+            PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
+            selectStmt.setInt(1, task.getId());
+            ResultSet rs = selectStmt.executeQuery();
+
+            if (rs.next()) {
+                oldStatus = Task.Status.valueOf(rs.getString("status"));
+            }
+            selectStmt.close();
+
+            // Update task as usual
             String query = "UPDATE tasks SET title = ?, description = ?, priority = ?, status = ?, due_date = ?, updated_at = ? WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(query);
 
@@ -124,6 +149,23 @@ public class TaskService {
 
             if (rowsAffected > 0) {
                 System.out.println("✅ Task updated successfully: " + task.getTitle());
+
+                // ✅ NEW: CHECK IF TASK WAS COMPLETED AND UPDATE GOALS
+                if (oldStatus != Task.Status.COMPLETED &&
+                        task.getStatus() == Task.Status.COMPLETED) {
+
+                    System.out.println("🎯 Task completed! Updating related goals...");
+
+                    try {
+                        // Update goals otomatis ketika task completed
+                        GoalProgressManager.getInstance().onTaskCompleted(task.getUserId(), task);
+
+                    } catch (Exception e) {
+                        System.err.println("⚠️ Error updating goals after task completion: " + e.getMessage());
+                        // Jangan fail task update kalau goal update error
+                    }
+                }
+
                 return true;
             }
 
