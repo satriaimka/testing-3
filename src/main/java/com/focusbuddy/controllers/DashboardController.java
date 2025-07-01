@@ -407,76 +407,132 @@ public class DashboardController {
         }
 
         try {
-            // Set up timer display update
+            System.out.println("🍅 Setting up Pomodoro timer...");
+
+            // Set up timer display update with enhanced error handling
             pomodoroTimer.setOnTimeUpdate((minutes, seconds) -> {
                 Platform.runLater(() -> {
                     try {
                         if (timerDisplay != null) {
-                            timerDisplay.setText(String.format("%02d:%02d", minutes, seconds));
+                            String timeText = String.format("%02d:%02d", minutes, seconds);
+                            timerDisplay.setText(timeText);
+
+                            // Debug output
+                            if (pomodoroTimer.isRunning()) {
+                                System.out.println("⏰ Timer display updated: " + timeText);
+                            }
                         }
+
                         if (timerProgress != null) {
                             double progress = pomodoroTimer.getProgress();
                             timerProgress.setProgress(progress);
 
-                            // Add pulsing animation when timer is running
+                            // Debug output
+                            if (pomodoroTimer.isRunning()) {
+                                System.out.println("📊 Progress updated: " + String.format("%.1f%%", progress * 100));
+                            }
+
+                            // Add visual feedback when timer is running
                             if (pomodoroTimer.isRunning() && progress > 0) {
                                 addTimerPulseAnimation();
                             }
                         }
+
+                        // Update timer button states
+                        updateTimerButtonStates();
+
                     } catch (Exception e) {
                         System.err.println("Error updating timer display: " + e.getMessage());
+                        e.printStackTrace();
                     }
                 });
             });
 
-            // Set up timer completion
+            // Set up timer completion with database integration
             pomodoroTimer.setOnTimerComplete(() -> {
                 Platform.runLater(() -> {
                     try {
-                        String sessionType = pomodoroTimer.isFocusSession() ? "Focus" : "Break";
+                        String sessionType = pomodoroTimer.isFocusSession() ? "Break" : "Focus"; // Note: inverted because it switches after completion
+                        String completedType = pomodoroTimer.isFocusSession() ? "Focus" : "Break";
+
                         NotificationManager.getInstance().showNotification(
-                                sessionType + " Session Complete!",
-                                "Great job! " + (pomodoroTimer.isFocusSession() ?
-                                        "Time for a well-deserved break." : "Ready for another focus session?"),
+                                completedType + " Session Complete! 🎉",
+                                completedType.equals("Focus") ?
+                                        "Great job! Time for a well-deserved break. 😌" :
+                                        "Break's over! Ready for another focus session? 💪",
                                 NotificationManager.NotificationType.SUCCESS
                         );
 
                         // Add completion animation
                         addTimerCompletionAnimation();
 
-                        if (resetTimerBtn != null) {
-                            resetTimerBtn.fire();
-                        }
+                        // Update timer button states
+                        updateTimerButtonStates();
+
+                        // Refresh dashboard data to show updated focus time
+                        Platform.runLater(() -> {
+                            try {
+                                loadRealDashboardData();
+                            } catch (Exception e) {
+                                System.err.println("Error refreshing dashboard after timer completion: " + e.getMessage());
+                            }
+                        });
+
+                        System.out.println("✅ " + completedType + " session completed successfully!");
+
                     } catch (Exception e) {
                         System.err.println("Error handling timer completion: " + e.getMessage());
+                        e.printStackTrace();
                     }
                 });
             });
 
-            // Set up timer controls with error handling
+            // Set up timer controls with enhanced functionality
             setupTimerControls();
 
-            // Initialize display
+            // Initialize display with proper formatting
             if (timerDisplay != null) {
                 timerDisplay.setText("25:00");
             }
             if (timerProgress != null) {
-                timerProgress.setProgress(0);
+                timerProgress.setProgress(0.0);
             }
 
-            System.out.println("✅ Pomodoro timer setup completed");
+            // Update button states
+            updateTimerButtonStates();
+
+            System.out.println("✅ Pomodoro timer setup completed successfully");
+
         } catch (Exception e) {
             ErrorHandler.handleError("Timer Setup", "Failed to setup Pomodoro timer", e);
+
+            // Fallback: Create new timer instance
+            try {
+                pomodoroTimer = new PomodoroTimer();
+                System.out.println("🔄 Created new timer instance as fallback");
+            } catch (Exception ex) {
+                System.err.println("Failed to create fallback timer: " + ex.getMessage());
+            }
         }
     }
 
     private void setupTimerControls() {
         try {
+            // Start Timer Button
             if (startTimerBtn != null) {
                 startTimerBtn.setOnAction(e -> {
                     try {
-                        pomodoroTimer.start();
-                        showTimerFeedback("Timer started! Stay focused. 🎯");
+                        if (!pomodoroTimer.isRunning()) {
+                            pomodoroTimer.start();
+
+                            String sessionType = pomodoroTimer.isFocusSession() ? "Focus" : "Break";
+                            showTimerFeedback("✨ " + sessionType + " session started! Stay focused. 🎯");
+
+                            // Update button states
+                            updateTimerButtonStates();
+
+                            System.out.println("▶️ Timer started: " + sessionType + " session");
+                        }
                     } catch (Exception ex) {
                         ErrorHandler.handleError("Timer Start", "Failed to start timer", ex);
                     }
@@ -484,11 +540,19 @@ public class DashboardController {
                 addButtonHoverEffect(startTimerBtn);
             }
 
+            // Pause Timer Button
             if (pauseTimerBtn != null) {
                 pauseTimerBtn.setOnAction(e -> {
                     try {
-                        pomodoroTimer.pause();
-                        showTimerFeedback("Timer paused. Take a moment to breathe. 😌");
+                        if (pomodoroTimer.isRunning()) {
+                            pomodoroTimer.pause();
+                            showTimerFeedback("⏸️ Timer paused. Take a moment to breathe. 😌");
+
+                            // Update button states
+                            updateTimerButtonStates();
+
+                            System.out.println("⏸️ Timer paused");
+                        }
                     } catch (Exception ex) {
                         ErrorHandler.handleError("Timer Pause", "Failed to pause timer", ex);
                     }
@@ -496,68 +560,153 @@ public class DashboardController {
                 addButtonHoverEffect(pauseTimerBtn);
             }
 
+            // Reset Timer Button
             if (resetTimerBtn != null) {
                 resetTimerBtn.setOnAction(e -> {
                     try {
                         pomodoroTimer.reset();
+
                         if (timerDisplay != null) {
                             timerDisplay.setText("25:00");
                         }
                         if (timerProgress != null) {
-                            timerProgress.setProgress(0);
+                            timerProgress.setProgress(0.0);
                         }
-                        showTimerFeedback("Timer reset. Ready for a fresh start! ✨");
+
+                        showTimerFeedback("🔄 Timer reset. Ready for a fresh start! ✨");
+
+                        // Update button states
+                        updateTimerButtonStates();
+
+                        System.out.println("🔄 Timer reset successfully");
+
                     } catch (Exception ex) {
                         ErrorHandler.handleError("Timer Reset", "Failed to reset timer", ex);
                     }
                 });
                 addButtonHoverEffect(resetTimerBtn);
             }
+
+            System.out.println("✅ Timer controls setup completed");
+
         } catch (Exception e) {
             System.err.println("Error setting up timer controls: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void updateTimerButtonStates() {
+        try {
+            if (pomodoroTimer == null) return;
+
+            boolean isRunning = pomodoroTimer.isRunning();
+
+            // Update button availability
+            if (startTimerBtn != null) {
+                startTimerBtn.setDisable(isRunning);
+                if (isRunning) {
+                    startTimerBtn.getStyleClass().add("disabled");
+                } else {
+                    startTimerBtn.getStyleClass().remove("disabled");
+                }
+            }
+
+            if (pauseTimerBtn != null) {
+                pauseTimerBtn.setDisable(!isRunning);
+                if (!isRunning) {
+                    pauseTimerBtn.getStyleClass().add("disabled");
+                } else {
+                    pauseTimerBtn.getStyleClass().remove("disabled");
+                }
+            }
+
+            if (resetTimerBtn != null) {
+                resetTimerBtn.setDisable(false); // Reset always available
+            }
+
+            // Update timer type indicator
+            if (timerDisplay != null) {
+                String sessionType = pomodoroTimer.isFocusSession() ? "Focus" : "Break";
+                // Could add session type to UI if needed
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error updating timer button states: " + e.getMessage());
         }
     }
 
     private void addTimerPulseAnimation() {
-        if (timerDisplay == null) return;
+        if (timerDisplay == null || !pomodoroTimer.isRunning()) return;
 
         try {
-            ScaleTransition pulse = new ScaleTransition(Duration.seconds(1), timerDisplay);
+            // Only pulse every 5 seconds to avoid too much animation
+            int currentSeconds = pomodoroTimer.getCurrentSeconds();
+            if (currentSeconds % 5 != 0) return;
+
+            ScaleTransition pulse = new ScaleTransition(Duration.seconds(0.8), timerDisplay);
             pulse.setFromX(1.0);
             pulse.setFromY(1.0);
-            pulse.setToX(1.05);
-            pulse.setToY(1.05);
+            pulse.setToX(1.02);
+            pulse.setToY(1.02);
             pulse.setCycleCount(2);
             pulse.setAutoReverse(true);
+            pulse.setInterpolator(Interpolator.EASE_BOTH);
             pulse.play();
+
+            // Add progress bar glow effect
+            if (timerProgress != null) {
+                FadeTransition glow = new FadeTransition(Duration.seconds(0.8), timerProgress);
+                glow.setFromValue(1.0);
+                glow.setToValue(0.7);
+                glow.setCycleCount(2);
+                glow.setAutoReverse(true);
+                glow.play();
+            }
+
         } catch (Exception e) {
             System.err.println("Error adding timer pulse animation: " + e.getMessage());
         }
     }
 
+
     private void addTimerCompletionAnimation() {
         if (timerDisplay == null) return;
 
         try {
-            // Flash animation
-            FadeTransition flash = new FadeTransition(Duration.millis(200), timerDisplay);
+            // Flash animation for completion
+            FadeTransition flash = new FadeTransition(Duration.millis(150), timerDisplay);
             flash.setFromValue(1.0);
-            flash.setToValue(0.3);
-            flash.setCycleCount(6);
+            flash.setToValue(0.2);
+            flash.setCycleCount(8);
             flash.setAutoReverse(true);
-            flash.play();
+            flash.setInterpolator(Interpolator.EASE_BOTH);
+
+            // Scale animation
+            ScaleTransition scale = new ScaleTransition(Duration.millis(300), timerDisplay);
+            scale.setFromX(1.0);
+            scale.setFromY(1.0);
+            scale.setToX(1.1);
+            scale.setToY(1.1);
+            scale.setCycleCount(2);
+            scale.setAutoReverse(true);
+            scale.setInterpolator(Interpolator.EASE_OUT);
+
+            // Progress bar completion effect
+            if (timerProgress != null) {
+                Timeline progressComplete = new Timeline(
+                        new KeyFrame(Duration.ZERO, new KeyValue(timerProgress.progressProperty(), timerProgress.getProgress())),
+                        new KeyFrame(Duration.millis(500), new KeyValue(timerProgress.progressProperty(), 1.0)),
+                        new KeyFrame(Duration.millis(1000), new KeyValue(timerProgress.progressProperty(), 0.0))
+                );
+                progressComplete.play();
+            }
+
+            // Play animations
+            ParallelTransition completion = new ParallelTransition(flash, scale);
+            completion.play();
+
         } catch (Exception e) {
             System.err.println("Error adding timer completion animation: " + e.getMessage());
-        }
-    }
-
-    private void showTimerFeedback(String message) {
-        try {
-            NotificationManager.getInstance().showNotification(
-                    "Timer", message, NotificationManager.NotificationType.INFO
-            );
-        } catch (Exception e) {
-            System.err.println("Error showing timer feedback: " + e.getMessage());
         }
     }
 
@@ -620,7 +769,7 @@ public class DashboardController {
     // ✅ UPDATE STATISTICS WITH REAL DATA FROM DATABASE
     private void updateRealStatistics(int userId, List<Task> userTasks) {
         try {
-            // Tasks Statistics
+            // Tasks Statistics (existing code...)
             long completedToday = userTasks.stream()
                     .filter(task -> task.getStatus() == Task.Status.COMPLETED &&
                             task.getCreatedAt() != null &&
@@ -641,29 +790,102 @@ public class DashboardController {
                 tasksProgress.setProgress(taskProgress);
             }
 
-            // Focus Time - Load from database (placeholder for now)
-            if (focusTimeLabel != null) {
-                focusTimeLabel.setText("No focus time recorded");
-            }
-            if (focusProgress != null) {
-                focusProgress.setProgress(0.0);
-            }
+            // ✅ ENHANCED FOCUS TIME - Load from database
+            loadFocusTimeFromDatabase(userId);
 
-            // Goals Progress - Load from database
+            // Goals Progress - Load from database (existing code...)
             loadGoalsProgress(userId);
 
-            // Mood Average - Load from database
+            // Mood Average - Load from database (existing code...)
             loadMoodAverage(userId);
 
-            // Productivity Insights
+            // Productivity Insights (existing code...)
             updateProductivityInsights(userId, userTasks);
 
-            // Today's Progress
+            // Today's Progress (existing code...)
             updateTodayProgress(userTasks);
 
         } catch (Exception e) {
             System.err.println("Error updating real statistics: " + e.getMessage());
             clearDashboardStats();
+        }
+    }
+
+    private void loadFocusTimeFromDatabase(int userId) {
+        try {
+            // Load focus time asynchronously
+            CompletableFuture.supplyAsync(() -> {
+                try {
+                    int todayMinutes = PomodoroTimer.getTodayFocusMinutes(userId);
+                    int weekMinutes = PomodoroTimer.getWeekFocusMinutes(userId);
+                    return new int[]{todayMinutes, weekMinutes};
+                } catch (Exception e) {
+                    System.err.println("Error loading focus time: " + e.getMessage());
+                    return new int[]{0, 0};
+                }
+            }).thenAccept(focusData -> {
+                Platform.runLater(() -> {
+                    try {
+                        int todayMinutes = focusData[0];
+                        int weekMinutes = focusData[1];
+
+                        if (focusTimeLabel != null) {
+                            if (todayMinutes > 0) {
+                                String focusText = formatFocusTime(todayMinutes);
+                                focusTimeLabel.setText(focusText + " today");
+                            } else {
+                                focusTimeLabel.setText("No focus time today");
+                            }
+                        }
+
+                        if (focusProgress != null) {
+                            // Progress based on daily goal (e.g., 2 hours = 120 minutes)
+                            int dailyGoalMinutes = 120; // 2 hours goal
+                            double progress = Math.min(1.0, (double) todayMinutes / dailyGoalMinutes);
+                            focusProgress.setProgress(progress);
+                        }
+
+                        // Update today's focus progress
+                        if (todayFocusProgress != null) {
+                            int dailyGoalMinutes = 120;
+                            double progress = Math.min(1.0, (double) todayMinutes / dailyGoalMinutes);
+                            todayFocusProgress.setProgress(progress);
+                        }
+
+                        System.out.println("✅ Focus time loaded: " + todayMinutes + " min today, " + weekMinutes + " min this week");
+
+                    } catch (Exception e) {
+                        System.err.println("Error updating focus time UI: " + e.getMessage());
+                    }
+                });
+            });
+
+        } catch (Exception e) {
+            System.err.println("Error loading focus time from database: " + e.getMessage());
+        }
+    }
+
+    private String formatFocusTime(int minutes) {
+        if (minutes < 60) {
+            return minutes + "m";
+        } else {
+            int hours = minutes / 60;
+            int remainingMinutes = minutes % 60;
+            if (remainingMinutes == 0) {
+                return hours + "h";
+            } else {
+                return hours + "h " + remainingMinutes + "m";
+            }
+        }
+    }
+
+    private void showTimerFeedback(String message) {
+        try {
+            NotificationManager.getInstance().showNotification(
+                    "🍅 Pomodoro Timer", message, NotificationManager.NotificationType.INFO
+            );
+        } catch (Exception e) {
+            System.err.println("Error showing timer feedback: " + e.getMessage());
         }
     }
 

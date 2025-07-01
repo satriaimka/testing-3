@@ -45,6 +45,9 @@ public class ActivityService {
             // Get recent goal activities
             activities.addAll(getRecentGoalActivities(userId));
 
+            // ✅ ADD FOCUS SESSIONS
+            activities.addAll(getRecentFocusActivities(userId));
+
             // Sort by timestamp (newest first) and limit
             return activities.stream()
                     .sorted((a, b) -> {
@@ -322,6 +325,68 @@ public class ActivityService {
             case 5 -> "Very Happy";
             default -> "Neutral";
         };
+    }
+
+    private List<ActivityItem> getRecentFocusActivities(int userId) {
+        List<ActivityItem> activities = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getInstance().getConnection()) {
+            // Get recent focus sessions (last 7 days)
+            String query = """
+            SELECT duration_minutes, session_date, created_at 
+            FROM focus_sessions 
+            WHERE user_id = ? 
+            AND session_type = 'FOCUS'
+            AND session_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            ORDER BY created_at DESC 
+            LIMIT 10
+            """;
+
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int duration = rs.getInt("duration_minutes");
+                Date sessionDate = rs.getDate("session_date");
+                Timestamp createdAt = rs.getTimestamp("created_at");
+
+                LocalDateTime timestamp = createdAt != null ?
+                        createdAt.toLocalDateTime() :
+                        sessionDate.toLocalDate().atStartOfDay();
+
+                String durationText = formatFocusTime(duration);
+
+                activities.add(new ActivityItem(
+                        ActivityItem.ActivityType.FOCUS_SESSION,
+                        "🍅 Completed " + durationText + " focus session",
+                        "Great work staying focused!",
+                        timestamp
+                ));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error getting recent focus activities: " + e.getMessage());
+        }
+
+        return activities;
+    }
+
+    /**
+     * Format focus time duration
+     */
+    private String formatFocusTime(int minutes) {
+        if (minutes < 60) {
+            return minutes + " min";
+        } else {
+            int hours = minutes / 60;
+            int remainingMinutes = minutes % 60;
+            if (remainingMinutes == 0) {
+                return hours + "h";
+            } else {
+                return hours + "h " + remainingMinutes + "m";
+            }
+        }
     }
 
     /**
