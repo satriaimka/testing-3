@@ -27,24 +27,23 @@ public class MoodTrackerController {
     @FXML private Label moodStreakLabel;
     
     private MoodService moodService;
-    
+
     @FXML
     private void initialize() {
         try {
             moodService = new MoodService();
-            
-            // Start with clean stats
-            clearMoodStats();
-            
+
             setupMoodSlider();
             setupSaveButton();
-            
-            // Load actual data if any exists
+
+            // ✅ UBAH: Load data real
             loadMoodData();
             loadMoodChart();
+
+            System.out.println("✅ Mood tracker initialized successfully");
         } catch (Exception e) {
             System.err.println("Error initializing mood tracker: " + e.getMessage());
-            clearMoodStats(); // Ensure clean state on error
+            showEmptyState(); // ✅ TAMBAH
         }
     }
     
@@ -99,17 +98,18 @@ public class MoodTrackerController {
             );
         }
     }
-    
-    private void clearMoodStats() {
+
+    // ✅ UBAH NAMA dari clearMoodStats() ke showEmptyState()
+    private void showEmptyState() {
         if (averageMoodLabel != null) {
-            averageMoodLabel.setText("No mood entries yet");
+            averageMoodLabel.setText("No mood entries yet - start tracking!");
         }
         if (moodStreakLabel != null) {
-            moodStreakLabel.setText("Start logging moods to build a streak!");
+            moodStreakLabel.setText("Log your mood daily to build a streak");
         }
         if (moodHistory != null) {
             moodHistory.getChildren().clear();
-            Label emptyLabel = new Label("No mood history yet. Start tracking your moods!");
+            Label emptyLabel = new Label("🌈 Start tracking your mood to see patterns and insights!");
             emptyLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px; -fx-padding: 20;");
             moodHistory.getChildren().add(emptyLabel);
         }
@@ -119,28 +119,33 @@ public class MoodTrackerController {
     }
 
     private void loadMoodData() {
-        int userId = UserSession.getInstance().getCurrentUser().getId();
-        List<MoodEntry> recentEntries = moodService.getRecentMoodEntries(userId, 7);
-        
-        // Start with clean state
-        clearMoodStats();
-        
-        // Update statistics only if there are entries
-        if (!recentEntries.isEmpty()) {
-            double averageMood = recentEntries.stream()
-                .mapToInt(MoodEntry::getMoodLevel)
-                .average()
-                .orElse(0.0);
-            
-            averageMoodLabel.setText(String.format("Average: %.1f", averageMood));
-            
-            int streak = moodService.getMoodStreak(userId);
-            if (streak > 0) {
-                moodStreakLabel.setText("Streak: " + streak + " days");
+        try {
+            int userId = UserSession.getInstance().getCurrentUser().getId();
+            List<MoodEntry> recentEntries = moodService.getRecentMoodEntries(userId, 7);
+
+            if (!recentEntries.isEmpty()) {
+                double averageMood = recentEntries.stream()
+                        .mapToInt(MoodEntry::getMoodLevel)
+                        .average()
+                        .orElse(0.0);
+
+                averageMoodLabel.setText(String.format("Average: %.1f/5", averageMood));
+
+                int streak = moodService.getMoodStreak(userId);
+                if (streak > 0) {
+                    moodStreakLabel.setText("Streak: " + streak + " days 🔥");
+                } else {
+                    moodStreakLabel.setText("Start your mood tracking streak!");
+                }
+
+                updateMoodHistory(recentEntries);
+            } else {
+                // ✅ TAMBAH: Show empty state untuk user baru
+                showEmptyState();
             }
-            
-            // Update history only if there are entries
-            updateMoodHistory(recentEntries);
+        } catch (Exception e) {
+            System.err.println("Error loading mood data: " + e.getMessage());
+            showEmptyState(); // ✅ TAMBAH
         }
     }
     

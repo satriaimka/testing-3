@@ -358,31 +358,8 @@ public class LoginController {
                     // Set current user session
                     UserSession.getInstance().setCurrentUser(user);
 
-                    // Clean up any existing data for non-demo users
-                    if (!user.getUsername().equals("demo")) {
-                        // Disable foreign key checks
-                        conn.createStatement().execute("SET FOREIGN_KEY_CHECKS = 0");
-                        
-                        // Delete all data for this user
-                        String[] tables = {
-                            "tasks",
-                            "mood_entries",
-                            "focus_sessions",
-                            "notes",
-                            "goals"
-                        };
-                        
-                        for (String table : tables) {
-                            String deleteQuery = "DELETE FROM " + table + " WHERE user_id = ?";
-                            PreparedStatement cleanupStmt = conn.prepareStatement(deleteQuery);
-                            cleanupStmt.setInt(1, user.getId());
-                            cleanupStmt.executeUpdate();
-                            cleanupStmt.close();
-                        }
-                        
-                        // Re-enable foreign key checks
-                        conn.createStatement().execute("SET FOREIGN_KEY_CHECKS = 1");
-                    }
+                    // ✅ HAPUS LOGIC PEMBERSIHAN DATA - BIARKAN DATA USER TETAP ADA
+                    // Data user seharusnya tersimpan dan tidak dihapus setiap login
 
                     Platform.runLater(() -> {
                         String welcomeMessage = "Welcome back, " + user.getFullName() + "! 🎉";

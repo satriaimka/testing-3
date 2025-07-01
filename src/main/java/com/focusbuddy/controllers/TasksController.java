@@ -69,10 +69,10 @@ public class TasksController {
             setupAutoSave();
             setupKeyboardShortcuts();
 
+            // ✅ UBAH: Jangan clear, load data real
             loadTasksSafely();
             updateStatistics();
 
-            // Add entrance animation
             addEntranceAnimation();
 
             System.out.println("✅ Tasks controller initialized successfully");
@@ -479,14 +479,26 @@ public class TasksController {
         }
     }
 
+    // ✅ TAMBAH METHOD BARU
+    private void showEmptyState() {
+        if (tasksList != null) {
+            tasksList.getItems().clear();
+            Label emptyLabel = new Label("Create your first task to get started!");
+            emptyLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px; -fx-padding: 20;");
+            tasksList.setPlaceholder(emptyLabel);
+        }
+
+        updateStatisticsLabels(0, 0, 0, 0);
+    }
+
     private void loadTasksSafely() {
         if (taskService == null) {
             System.err.println("Task service not available");
+            showEmptyState(); // ✅ TAMBAH: Method ini
             return;
         }
 
         try {
-            // Load tasks asynchronously
             CompletableFuture.supplyAsync(() -> {
                 try {
                     int userId = UserSession.getInstance().getCurrentUser().getId();
@@ -501,14 +513,21 @@ public class TasksController {
                         allTasks.setAll(tasks);
                         applyFilters();
                         updateStatistics();
+
+                        if (tasks.isEmpty()) {
+                            showEmptyState(); // ✅ TAMBAH
+                        }
+
                         System.out.println("✅ Tasks loaded successfully: " + tasks.size() + " tasks");
                     } catch (Exception e) {
                         ErrorHandler.handleError("Tasks Loading", "Failed to display loaded tasks", e);
+                        showEmptyState(); // ✅ TAMBAH
                     }
                 });
             });
         } catch (Exception e) {
             ErrorHandler.handleError("Tasks Loading", "Failed to load tasks", e);
+            showEmptyState(); // ✅ TAMBAH
         }
     }
 
@@ -848,11 +867,18 @@ public class TasksController {
 
     private void updateStatisticsLabels(int total, int pending, int completed, int overdue) {
         try {
-            if (totalTasksLabel != null) totalTasksLabel.setText("Total: " + total);
-            if (pendingTasksLabel != null) pendingTasksLabel.setText("Pending: " + pending);
-            if (completedTasksLabel != null) completedTasksLabel.setText("Completed: " + completed);
+            // ✅ UBAH: Tampilkan pesan yang lebih user-friendly
+            if (totalTasksLabel != null) {
+                totalTasksLabel.setText(total > 0 ? "Total: " + total : "No tasks yet");
+            }
+            if (pendingTasksLabel != null) {
+                pendingTasksLabel.setText(pending > 0 ? "Pending: " + pending : "No pending tasks");
+            }
+            if (completedTasksLabel != null) {
+                completedTasksLabel.setText(completed > 0 ? "Completed: " + completed : "No completed tasks");
+            }
             if (overdueTasksLabel != null) {
-                overdueTasksLabel.setText("Overdue: " + overdue);
+                overdueTasksLabel.setText(overdue > 0 ? "Overdue: " + overdue : "No overdue tasks");
                 if (overdue > 0) {
                     overdueTasksLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-weight: bold;");
                 } else {

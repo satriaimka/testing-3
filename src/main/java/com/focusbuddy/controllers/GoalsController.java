@@ -32,27 +32,26 @@ public class GoalsController {
     
     private GoalsService goalsService;
     private Goal currentGoal;
-    
+
     @FXML
     private void initialize() {
         try {
             goalsService = new GoalsService();
-            
-            // Start with clean stats
-            clearGoalsStats();
-            
+
             setupGoalsList();
             setupComboBox();
             setupButtons();
             setupSpinner();
-            
-            // Load actual data if any exists
+
+            // ✅ UBAH: Load data real, jangan clear
             loadGoals();
             loadStatistics();
             loadAchievements();
+
+            System.out.println("✅ Goals controller initialized successfully");
         } catch (Exception e) {
             System.err.println("Error initializing goals controller: " + e.getMessage());
-            clearGoalsStats(); // Ensure clean state on error
+            showEmptyState(); // ✅ TAMBAH
         }
     }
     
@@ -224,41 +223,45 @@ public class GoalsController {
             }
         });
     }
-    
-    private void clearGoalsStats() {
-        // Clear statistics
-        if (totalGoalsLabel != null) totalGoalsLabel.setText("No goals yet");
-        if (completedGoalsLabel != null) completedGoalsLabel.setText("No completed goals");
-        if (activeGoalsLabel != null) activeGoalsLabel.setText("No active goals");
-        
-        // Clear achievements
+
+    // ✅ UBAH NAMA dari clearGoalsStats() ke showEmptyState()
+    private void showEmptyState() {
+        if (totalGoalsLabel != null) totalGoalsLabel.setText("No goals set yet");
+        if (completedGoalsLabel != null) completedGoalsLabel.setText("Start by creating your first goal");
+        if (activeGoalsLabel != null) activeGoalsLabel.setText("Set goals to track your progress");
+
         if (achievementsContainer != null) {
             achievementsContainer.getChildren().clear();
-            Label emptyLabel = new Label("Complete goals to earn achievements!");
+            Label emptyLabel = new Label("🎯 Create goals and complete them to unlock achievements!");
             emptyLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px; -fx-padding: 20;");
             achievementsContainer.getChildren().add(emptyLabel);
         }
-        
-        // Clear goals list
+
         if (goalsList != null) {
             goalsList.getItems().clear();
-            goalsList.setPlaceholder(new Label("Create your first goal to get started!"));
+            goalsList.setPlaceholder(new Label("Create your first goal to start tracking progress!"));
         }
     }
 
     private void loadStatistics() {
-        int userId = UserSession.getInstance().getCurrentUser().getId();
-        
-        int totalGoals = goalsService.getTotalGoalsCount(userId);
-        int completedGoals = goalsService.getCompletedGoalsCount(userId);
-        int activeGoals = goalsService.getActiveGoalsCount(userId);
-        
-        if (totalGoals > 0) {
-            totalGoalsLabel.setText("Total Goals: " + totalGoals);
-            completedGoalsLabel.setText("Completed: " + completedGoals);
-            activeGoalsLabel.setText("Active: " + activeGoals);
-        } else {
-            clearGoalsStats();
+        try {
+            int userId = UserSession.getInstance().getCurrentUser().getId();
+
+            int totalGoals = goalsService.getTotalGoalsCount(userId);
+            int completedGoals = goalsService.getCompletedGoalsCount(userId);
+            int activeGoals = goalsService.getActiveGoalsCount(userId);
+
+            if (totalGoals > 0) {
+                totalGoalsLabel.setText("Total Goals: " + totalGoals);
+                completedGoalsLabel.setText("Completed: " + completedGoals);
+                activeGoalsLabel.setText("Active: " + activeGoals);
+            } else {
+                // ✅ TAMBAH: Show empty state untuk user baru
+                showEmptyState();
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading statistics: " + e.getMessage());
+            showEmptyState(); // ✅ TAMBAH
         }
     }
     

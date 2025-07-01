@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<HBox spacing="20.0" stylesheets="@../css/modern-light-theme.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.focusbuddy.controllers.TasksController">
+<HBox spacing="20.0" stylesheets="@../css/modern-light-theme.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.focusbuddy.controllers.TasksController">
    <children>
       <!-- LEFT PANEL - Task List with Enhanced Filters -->
       <VBox prefWidth="480.0" spacing="16.0" styleClass="card-modern">
@@ -38,7 +52,6 @@
                               <Label fx:id="totalTasksLabel" styleClass="stat-number-small" text="0" />
                            </children>
                         </HBox>
-                        <Label styleClass="stat-label-small" text="Total Tasks" />
                      </children>
                   </VBox>
 
@@ -50,7 +63,6 @@
                               <Label fx:id="pendingTasksLabel" styleClass="stat-number-small" text="0" />
                            </children>
                         </HBox>
-                        <Label styleClass="stat-label-small" text="Pending" />
                      </children>
                   </VBox>
 
@@ -62,7 +74,6 @@
                               <Label fx:id="completedTasksLabel" styleClass="stat-number-small" text="0" />
                            </children>
                         </HBox>
-                        <Label styleClass="stat-label-small" text="Completed" />
                      </children>
                   </VBox>
 
@@ -74,7 +85,6 @@
                               <Label fx:id="overdueTasksLabel" styleClass="stat-number-small" text="0" />
                            </children>
                         </HBox>
-                        <Label styleClass="stat-label-small" text="Overdue" />
                      </children>
                   </VBox>
                </children>
@@ -287,47 +297,8 @@
                         <!-- Productivity Insights -->
                         <VBox spacing="10.0" styleClass="insights-section">
                            <children>
-                              <HBox alignment="CENTER_LEFT" spacing="6.0">
-                                 <children>
-                                    <Label style="-fx-font-size: 14px;" text="📈" />
-                                    <Label styleClass="section-header" text="Productivity Insights" />
-                                 </children>
-                              </HBox>
 
                               <GridPane hgap="12.0" styleClass="insights-grid" vgap="8.0">
-                                 <children>
-                                    <VBox alignment="CENTER" spacing="3.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                                       <children>
-                                          <Label style="-fx-font-size: 18px;" text="🔥" />
-                                          <Label styleClass="insight-number-small" text="7 days" />
-                                          <Label styleClass="insight-label-small" text="Current Streak" />
-                                       </children>
-                                    </VBox>
-
-                                    <VBox alignment="CENTER" spacing="3.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                                       <children>
-                                          <Label style="-fx-font-size: 18px;" text="⚡" />
-                                          <Label styleClass="insight-number-small" text="85%" />
-                                          <Label styleClass="insight-label-small" text="Completion Rate" />
-                                       </children>
-                                    </VBox>
-
-                                    <VBox alignment="CENTER" spacing="3.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                                       <children>
-                                          <Label style="-fx-font-size: 18px;" text="🎯" />
-                                          <Label styleClass="insight-number-small" text="3.2 hrs" />
-                                          <Label styleClass="insight-label-small" text="Avg. Focus Time" />
-                                       </children>
-                                    </VBox>
-
-                                    <VBox alignment="CENTER" spacing="3.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                       <children>
-                                          <Label style="-fx-font-size: 18px;" text="🏆" />
-                                          <Label styleClass="insight-number-small" text="12" />
-                                          <Label styleClass="insight-label-small" text="This Week" />
-                                       </children>
-                                    </VBox>
-                                 </children>
                                  <columnConstraints>
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />

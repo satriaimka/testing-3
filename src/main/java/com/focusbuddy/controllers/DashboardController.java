@@ -1,8 +1,12 @@
 package com.focusbuddy.controllers;
 
 import com.focusbuddy.models.Task;
+import com.focusbuddy.services.ActivityService;
+import com.focusbuddy.models.ActivityItem;
 import com.focusbuddy.services.PomodoroTimer;
 import com.focusbuddy.services.TaskService;
+import com.focusbuddy.services.MoodService;
+import com.focusbuddy.services.GoalsService;
 import com.focusbuddy.utils.ThemeManager;
 import com.focusbuddy.utils.UserSession;
 import com.focusbuddy.utils.NotificationManager;
@@ -51,28 +55,36 @@ public class DashboardController {
     @FXML private ProgressBar timerProgress;
     @FXML private VBox tasksList;
 
-    // Dashboard statistics labels - ALL DECLARED HERE
+    // Dashboard statistics labels - ALL REAL DATA FROM DATABASE
     @FXML private Label tasksCompletedLabel;
     @FXML private Label focusTimeLabel;
-    @FXML private Label productivityLabel;
-    @FXML private Label streakLabel;
     @FXML private Label goalsProgressLabel;
     @FXML private Label moodAverageLabel;
+    @FXML private Label streakLabel;
     @FXML private Label efficiencyLabel;
     @FXML private Label todayProgressLabel;
     @FXML private Label recentActivityLabel;
 
+    // Progress bars for visual indicators
+    @FXML private ProgressBar tasksProgress;
+    @FXML private ProgressBar focusProgress;
+    @FXML private ProgressBar goalsProgress;
+    @FXML private ProgressBar moodProgress;
+    @FXML private ProgressBar todayTasksProgress;
+    @FXML private ProgressBar todayFocusProgress;
+    @FXML private VBox recentActivityContainer;
+
     private PomodoroTimer pomodoroTimer;
     private TaskService taskService;
+    private MoodService moodService;
+    private GoalsService goalsService;
     private String currentView = "dashboard";
     private Node dashboardContent;
+    private ActivityService activityService;
 
     @FXML
     private void initialize() {
         try {
-            // Start with clean stats
-            clearDashboardStats();
-
             // Initialize services safely
             initializeServices();
 
@@ -101,7 +113,8 @@ public class DashboardController {
                 try {
                     setupResponsiveLayout();
                     ensureWindowIsMaximized();
-                    loadDashboardDataSafely();
+                    // ✅ LOAD REAL DATA FROM DATABASE
+                    loadRealDashboardData();
                     startPeriodicUpdates();
                 } catch (Exception e) {
                     ErrorHandler.handleError("Dashboard Initialization",
@@ -119,14 +132,20 @@ public class DashboardController {
     private void initializeServices() {
         try {
             taskService = new TaskService();
+            moodService = new MoodService();
+            goalsService = new GoalsService();
             pomodoroTimer = new PomodoroTimer();
+            activityService = new ActivityService(); // ✅ TAMBAH INI
             System.out.println("✅ Services initialized successfully");
         } catch (Exception e) {
             ErrorHandler.handleError("Service Initialization",
                     "Failed to initialize dashboard services", e);
             // Fallback: create empty instances
             if (taskService == null) taskService = new TaskService();
+            if (moodService == null) moodService = new MoodService();
+            if (goalsService == null) goalsService = new GoalsService();
             if (pomodoroTimer == null) pomodoroTimer = new PomodoroTimer();
+            if (activityService == null) activityService = new ActivityService(); // ✅ TAMBAH INI
         }
     }
 
@@ -307,7 +326,6 @@ public class DashboardController {
         }
     }
 
-    // FIXED: Changed parameter from Button to Control to accept both Button and ToggleButton
     private void addControlHoverEffect(Control control) {
         try {
             ScaleTransition scaleUp = new ScaleTransition(Duration.millis(150), control);
@@ -325,7 +343,6 @@ public class DashboardController {
         }
     }
 
-    // Keep the old method for backward compatibility with Button parameters
     private void addButtonHoverEffect(Button button) {
         addControlHoverEffect(button);
     }
@@ -340,7 +357,6 @@ public class DashboardController {
 
                 themeToggle.setOnAction(e -> toggleThemeWithAnimation());
 
-                // FIXED: Use addControlHoverEffect instead of addButtonHoverEffect
                 addControlHoverEffect(themeToggle);
 
                 System.out.println("✅ Theme toggle setup completed");
@@ -557,9 +573,11 @@ public class DashboardController {
         }
     }
 
-    private void loadDashboardDataSafely() {
-        if (tasksList == null || taskService == null) {
-            System.out.println("⚠️ Tasks list or service not available, skipping tasks load");
+    // ✅ LOAD REAL DATA FROM DATABASE
+    private void loadRealDashboardData() {
+        if (taskService == null) {
+            System.out.println("⚠️ Task service not available, skipping data load");
+            clearDashboardStats();
             return;
         }
 
@@ -574,23 +592,436 @@ public class DashboardController {
                     System.err.println("Error loading tasks: " + e.getMessage());
                     return List.<Task>of(); // Return empty list as fallback
                 }
-            }).thenAccept(todayTasks -> {
+            }).thenAccept(userTasks -> {
                 Platform.runLater(() -> {
                     try {
-                        updateTasksList(todayTasks);
-                        updateStatistics(todayTasks);
+                        // Update tasks list
+                        updateTasksList(userTasks);
 
-                        // Clear all statistics and insights for new users
-                        clearDashboardStats();
+                        // Update all statistics with REAL data
+                        updateRealStatistics(userId, userTasks);
 
-                        System.out.println("✅ Dashboard data loaded successfully");
+                        // Load recent activity
+                        updateRecentActivity(userId);
+
+                        System.out.println("✅ Real dashboard data loaded successfully");
                     } catch (Exception e) {
                         System.err.println("Error updating dashboard data: " + e.getMessage());
+                        clearDashboardStats(); // Fallback to clean state
                     }
                 });
             });
         } catch (Exception e) {
             ErrorHandler.handleError("Dashboard Data", "Failed to load dashboard data", e);
+            clearDashboardStats();
+        }
+    }
+
+    // ✅ UPDATE STATISTICS WITH REAL DATA FROM DATABASE
+    private void updateRealStatistics(int userId, List<Task> userTasks) {
+        try {
+            // Tasks Statistics
+            long completedToday = userTasks.stream()
+                    .filter(task -> task.getStatus() == Task.Status.COMPLETED &&
+                            task.getCreatedAt() != null &&
+                            task.getCreatedAt().toLocalDate().equals(LocalDate.now()))
+                    .count();
+
+            long totalTasks = userTasks.size();
+            double taskProgress = totalTasks > 0 ? (double) completedToday / totalTasks : 0.0;
+
+            if (tasksCompletedLabel != null) {
+                if (completedToday > 0) {
+                    tasksCompletedLabel.setText(completedToday + " completed");
+                } else {
+                    tasksCompletedLabel.setText("No tasks completed");
+                }
+            }
+            if (tasksProgress != null) {
+                tasksProgress.setProgress(taskProgress);
+            }
+
+            // Focus Time - Load from database (placeholder for now)
+            if (focusTimeLabel != null) {
+                focusTimeLabel.setText("No focus time recorded");
+            }
+            if (focusProgress != null) {
+                focusProgress.setProgress(0.0);
+            }
+
+            // Goals Progress - Load from database
+            loadGoalsProgress(userId);
+
+            // Mood Average - Load from database
+            loadMoodAverage(userId);
+
+            // Productivity Insights
+            updateProductivityInsights(userId, userTasks);
+
+            // Today's Progress
+            updateTodayProgress(userTasks);
+
+        } catch (Exception e) {
+            System.err.println("Error updating real statistics: " + e.getMessage());
+            clearDashboardStats();
+        }
+    }
+
+    private void loadGoalsProgress(int userId) {
+        try {
+            if (goalsService != null) {
+                CompletableFuture.supplyAsync(() -> {
+                    try {
+                        int totalGoals = goalsService.getTotalGoalsCount(userId);
+                        int completedGoals = goalsService.getCompletedGoalsCount(userId);
+                        return new int[]{totalGoals, completedGoals};
+                    } catch (Exception e) {
+                        return new int[]{0, 0};
+                    }
+                }).thenAccept(goalsData -> {
+                    Platform.runLater(() -> {
+                        int totalGoals = goalsData[0];
+                        int completedGoals = goalsData[1];
+
+                        if (goalsProgressLabel != null) {
+                            if (totalGoals > 0) {
+                                goalsProgressLabel.setText(completedGoals + "/" + totalGoals);
+                            } else {
+                                goalsProgressLabel.setText("No goals set");
+                            }
+                        }
+
+                        if (goalsProgress != null) {
+                            double progress = totalGoals > 0 ? (double) completedGoals / totalGoals : 0.0;
+                            goalsProgress.setProgress(progress);
+                        }
+                    });
+                });
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading goals progress: " + e.getMessage());
+        }
+    }
+
+    private void loadMoodAverage(int userId) {
+        try {
+            if (moodService != null) {
+                CompletableFuture.supplyAsync(() -> {
+                    try {
+                        var recentMoods = moodService.getRecentMoodEntries(userId, 7);
+                        if (!recentMoods.isEmpty()) {
+                            double average = recentMoods.stream()
+                                    .mapToInt(mood -> mood.getMoodLevel())
+                                    .average()
+                                    .orElse(0.0);
+                            return average;
+                        }
+                        return 0.0;
+                    } catch (Exception e) {
+                        return 0.0;
+                    }
+                }).thenAccept(average -> {
+                    Platform.runLater(() -> {
+                        if (moodAverageLabel != null) {
+                            if (average > 0) {
+                                moodAverageLabel.setText(String.format("%.1f/5", average));
+                            } else {
+                                moodAverageLabel.setText("No mood entries");
+                            }
+                        }
+
+                        if (moodProgress != null) {
+                            moodProgress.setProgress(average / 5.0);
+                        }
+                    });
+                });
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading mood average: " + e.getMessage());
+        }
+    }
+
+    private void updateProductivityInsights(int userId, List<Task> userTasks) {
+        try {
+            // Streak calculation (simplified)
+            long streak = userTasks.stream()
+                    .filter(task -> task.getStatus() == Task.Status.COMPLETED &&
+                            task.getCreatedAt() != null &&
+                            task.getCreatedAt().toLocalDate().equals(LocalDate.now()))
+                    .count();
+
+            if (streakLabel != null) {
+                if (streak > 0) {
+                    streakLabel.setText(streak + " today");
+                } else {
+                    streakLabel.setText("No active streak");
+                }
+            }
+
+            // Efficiency (completion rate)
+            long totalTasks = userTasks.size();
+            long completedTasks = userTasks.stream()
+                    .filter(task -> task.getStatus() == Task.Status.COMPLETED)
+                    .count();
+
+            if (efficiencyLabel != null) {
+                if (totalTasks > 0) {
+                    double efficiency = (double) completedTasks / totalTasks * 100;
+                    efficiencyLabel.setText(String.format("%.0f%%", efficiency));
+                } else {
+                    efficiencyLabel.setText("--");
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error updating productivity insights: " + e.getMessage());
+        }
+    }
+
+    private void updateTodayProgress(List<Task> userTasks) {
+        try {
+            // Today's tasks progress
+            long todayTasks = userTasks.stream()
+                    .filter(task -> task.getCreatedAt() != null &&
+                            task.getCreatedAt().toLocalDate().equals(LocalDate.now()))
+                    .count();
+
+            long todayCompleted = userTasks.stream()
+                    .filter(task -> task.getStatus() == Task.Status.COMPLETED &&
+                            task.getCreatedAt() != null &&
+                            task.getCreatedAt().toLocalDate().equals(LocalDate.now()))
+                    .count();
+
+            if (todayProgressLabel != null) {
+                if (todayTasks > 0) {
+                    todayProgressLabel.setText(todayCompleted + "/" + todayTasks);
+                } else {
+                    todayProgressLabel.setText("No progress yet");
+                }
+            }
+
+            if (todayTasksProgress != null) {
+                double progress = todayTasks > 0 ? (double) todayCompleted / todayTasks : 0.0;
+                todayTasksProgress.setProgress(progress);
+            }
+
+            // Today's focus progress (placeholder)
+            if (todayFocusProgress != null) {
+                todayFocusProgress.setProgress(0.0);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error updating today's progress: " + e.getMessage());
+        }
+    }
+
+    private void updateRecentActivity(int userId) {
+        try {
+            if (activityService == null) {
+                showEmptyActivity();
+                return;
+            }
+
+            // Load recent activities asynchronously
+            CompletableFuture.supplyAsync(() -> {
+                try {
+                    return activityService.getRecentActivities(userId, 8); // Get max 8 activities
+                } catch (Exception e) {
+                    System.err.println("Error loading recent activities: " + e.getMessage());
+                    return List.<ActivityItem>of();
+                }
+            }).thenAccept(activities -> {
+                Platform.runLater(() -> {
+                    try {
+                        displayRecentActivities(activities);
+                    } catch (Exception e) {
+                        System.err.println("Error displaying recent activities: " + e.getMessage());
+                        showEmptyActivity();
+                    }
+                });
+            });
+
+        } catch (Exception e) {
+            System.err.println("Error updating recent activity: " + e.getMessage());
+            showEmptyActivity();
+        }
+    }
+
+    private void showEmptyActivity() {
+        try {
+            if (recentActivityContainer != null) {
+                recentActivityContainer.getChildren().clear();
+
+                VBox emptyState = new VBox(8);
+                emptyState.setAlignment(javafx.geometry.Pos.CENTER);
+                emptyState.setStyle("-fx-padding: 20;");
+
+                Label emptyIcon = new Label("🌟");
+                emptyIcon.setStyle("-fx-font-size: 24px;");
+
+                Label emptyMessage = new Label("No recent activity yet");
+                emptyMessage.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #6b7280;");
+
+                Label emptySubtext = new Label("Start creating tasks, notes, or logging mood!");
+                emptySubtext.setStyle("-fx-font-size: 10px; -fx-text-fill: #9ca3af;");
+                emptySubtext.setWrapText(true);
+                emptySubtext.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+
+                emptyState.getChildren().addAll(emptyIcon, emptyMessage, emptySubtext);
+                recentActivityContainer.getChildren().add(emptyState);
+            }
+        } catch (Exception e) {
+            System.err.println("Error showing empty activity state: " + e.getMessage());
+        }
+    }
+
+    private void displayRecentActivities(List<ActivityItem> activities) {
+        try {
+            if (recentActivityContainer != null) {
+                recentActivityContainer.getChildren().clear();
+
+                if (activities.isEmpty()) {
+                    showEmptyActivity();
+                    return;
+                }
+
+                // Display activities
+                for (int i = 0; i < Math.min(activities.size(), 6); i++) {
+                    ActivityItem activity = activities.get(i);
+                    VBox activityItem = createActivityItemUI(activity);
+                    recentActivityContainer.getChildren().add(activityItem);
+
+                    // Add entrance animation with delay
+                    addActivityItemAnimation(activityItem, i * 100);
+                }
+
+                // Add "View All" link if there are more activities
+                if (activities.size() > 6) {
+                    Label viewAllLabel = new Label("View all activities (" + activities.size() + ")");
+                    viewAllLabel.setStyle("-fx-text-fill: #667eea; -fx-font-size: 10px; -fx-padding: 8 0 0 0; -fx-cursor: hand; -fx-underline: true;");
+                    viewAllLabel.setOnMouseClicked(e -> {
+                        // TODO: Navigate to full activity view or expand
+                        NotificationManager.getInstance().showNotification(
+                                "Activities",
+                                "Full activity view coming soon!",
+                                NotificationManager.NotificationType.INFO
+                        );
+                    });
+                    recentActivityContainer.getChildren().add(viewAllLabel);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error displaying recent activities: " + e.getMessage());
+            showEmptyActivity();
+        }
+    }
+
+    private VBox createActivityItemUI(ActivityItem activity) {
+        try {
+            VBox itemContainer = new VBox(3);
+            itemContainer.setStyle("-fx-padding: 8; -fx-background-color: transparent;");
+            itemContainer.getStyleClass().add("activity-item");
+
+            // Top row: Icon + Title
+            HBox topRow = new HBox(8);
+            topRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+            Label iconLabel = new Label(activity.getIcon());
+            iconLabel.setStyle("-fx-font-size: 12px;");
+            iconLabel.setMinWidth(16);
+
+            Label titleLabel = new Label(activity.getTitle());
+            titleLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #374151;");
+            titleLabel.setWrapText(true);
+            titleLabel.setMaxWidth(180);
+            HBox.setHgrow(titleLabel, javafx.scene.layout.Priority.ALWAYS);
+
+            topRow.getChildren().addAll(iconLabel, titleLabel);
+
+            // Bottom row: Description + Time
+            HBox bottomRow = new HBox(8);
+            bottomRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+            // Spacer for alignment with icon
+            Region spacer = new Region();
+            spacer.setMinWidth(16);
+
+            VBox textContainer = new VBox(1);
+            HBox.setHgrow(textContainer, javafx.scene.layout.Priority.ALWAYS);
+
+            if (activity.getDescription() != null && !activity.getDescription().trim().isEmpty()) {
+                Label descLabel = new Label(activity.getDescription());
+                descLabel.setStyle("-fx-font-size: 9px; -fx-text-fill: #6b7280;");
+                descLabel.setWrapText(true);
+                descLabel.setMaxWidth(160);
+                textContainer.getChildren().add(descLabel);
+            }
+
+            Label timeLabel = new Label(activity.getTimeAgo());
+            timeLabel.setStyle("-fx-font-size: 9px; -fx-text-fill: #9ca3af; -fx-font-style: italic;");
+            textContainer.getChildren().add(timeLabel);
+
+            bottomRow.getChildren().addAll(spacer, textContainer);
+
+            itemContainer.getChildren().addAll(topRow, bottomRow);
+
+            // Add hover effect
+            itemContainer.setOnMouseEntered(e -> {
+                itemContainer.setStyle(itemContainer.getStyle() + " -fx-background-color: #f8fafc; -fx-background-radius: 4;");
+            });
+
+            itemContainer.setOnMouseExited(e -> {
+                itemContainer.setStyle(itemContainer.getStyle().replace(" -fx-background-color: #f8fafc; -fx-background-radius: 4;", ""));
+            });
+
+            // Add click handler for future navigation
+            itemContainer.setOnMouseClicked(e -> {
+                try {
+                    // TODO: Navigate to related item based on activity type
+                    String message = "Clicked on: " + activity.getTitle();
+                    System.out.println("Activity clicked: " + activity.getType() + " - " + activity.getTitle());
+                } catch (Exception ex) {
+                    System.err.println("Error handling activity click: " + ex.getMessage());
+                }
+            });
+
+            return itemContainer;
+
+        } catch (Exception e) {
+            System.err.println("Error creating activity item UI: " + e.getMessage());
+            // Fallback simple item
+            VBox fallback = new VBox();
+            Label fallbackLabel = new Label(activity.getIcon() + " " + activity.getTitle());
+            fallbackLabel.setStyle("-fx-font-size: 11px; -fx-padding: 4;");
+            fallback.getChildren().add(fallbackLabel);
+            return fallback;
+        }
+    }
+
+    private void addActivityItemAnimation(VBox activityItem, double delayMs) {
+        try {
+            activityItem.setOpacity(0);
+            activityItem.setTranslateX(-10);
+
+            PauseTransition delay = new PauseTransition(Duration.millis(delayMs));
+            delay.setOnFinished(e -> {
+                FadeTransition fade = new FadeTransition(Duration.millis(200), activityItem);
+                fade.setFromValue(0);
+                fade.setToValue(1);
+
+                TranslateTransition slide = new TranslateTransition(Duration.millis(200), activityItem);
+                slide.setFromX(-10);
+                slide.setToX(0);
+                slide.setInterpolator(Interpolator.EASE_OUT);
+
+                ParallelTransition animation = new ParallelTransition(fade, slide);
+                animation.play();
+            });
+            delay.play();
+        } catch (Exception e) {
+            // Fallback: just show the item
+            activityItem.setOpacity(1);
+            activityItem.setTranslateX(0);
         }
     }
 
@@ -600,13 +1031,20 @@ public class DashboardController {
         if (focusTimeLabel != null) focusTimeLabel.setText("No focus time recorded");
 
         // Productivity Insights
-        if (productivityLabel != null) productivityLabel.setText("Start tasks to see efficiency");
         if (streakLabel != null) streakLabel.setText("No active streak");
         if (goalsProgressLabel != null) goalsProgressLabel.setText("No goals set");
         if (moodAverageLabel != null) moodAverageLabel.setText("No mood entries");
         if (efficiencyLabel != null) efficiencyLabel.setText("--");
         if (todayProgressLabel != null) todayProgressLabel.setText("No progress yet");
         if (recentActivityLabel != null) recentActivityLabel.setText("No recent activity");
+
+        // Reset progress bars
+        if (tasksProgress != null) tasksProgress.setProgress(0.0);
+        if (focusProgress != null) focusProgress.setProgress(0.0);
+        if (goalsProgress != null) goalsProgress.setProgress(0.0);
+        if (moodProgress != null) moodProgress.setProgress(0.0);
+        if (todayTasksProgress != null) todayTasksProgress.setProgress(0.0);
+        if (todayFocusProgress != null) todayFocusProgress.setProgress(0.0);
     }
 
     private void updateTasksList(List<Task> tasks) {
@@ -695,7 +1133,7 @@ public class DashboardController {
                     );
 
                     // Refresh data
-                    loadDashboardDataSafely();
+                    loadRealDashboardData();
                 } catch (Exception ex) {
                     ErrorHandler.handleError("Task Update", "Failed to update task", ex);
                 }
@@ -781,30 +1219,11 @@ public class DashboardController {
         }
     }
 
-    private void updateStatistics(List<Task> tasks) {
-        try {
-            clearDashboardStats(); // Always start with clean stats
-
-            // Only update stats if there are completed tasks
-            long completedTasks = tasks.stream()
-                    .filter(task -> task.getStatus() == Task.Status.COMPLETED)
-                    .count();
-
-            if (completedTasks > 0 && tasksCompletedLabel != null) {
-                tasksCompletedLabel.setText(completedTasks + " completed");
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error updating statistics: " + e.getMessage());
-            clearDashboardStats(); // Ensure clean state on error
-        }
-    }
-
     private void startPeriodicUpdates() {
         try {
             // Update dashboard data every 5 minutes
             Timeline updateTimeline = new Timeline(
-                    new KeyFrame(Duration.minutes(5), e -> loadDashboardDataSafely())
+                    new KeyFrame(Duration.minutes(5), e -> loadRealDashboardData())
             );
             updateTimeline.setCycleCount(Timeline.INDEFINITE);
             updateTimeline.play();
@@ -848,7 +1267,7 @@ public class DashboardController {
 
                 // Re-setup timer if needed
                 setupPomodoroTimerSafely();
-                loadDashboardDataSafely();
+                loadRealDashboardData();
             } catch (Exception e) {
                 ErrorHandler.handleError("Navigation", "Failed to show dashboard", e);
             }

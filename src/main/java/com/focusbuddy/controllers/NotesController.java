@@ -58,28 +58,24 @@ public class NotesController {
         try {
             notesService = new NotesService();
 
-            // Start with clean state
-            clearNotesState();
-
             setupNotesList();
             setupButtons();
             setupSearch();
-            setupComboBoxes();  // Setup all ComboBoxes
+            setupComboBoxes();
             setupAutoSave();
             setupKeyboardShortcuts();
             setupWordCount();
 
-            // Load actual data if any exists
+            // ✅ UBAH: Load data real
             loadNotes();
 
-            // Add entrance animation
             addEntranceAnimation();
 
             System.out.println("✅ Notes controller initialized successfully");
         } catch (Exception e) {
             ErrorHandler.handleError("Notes Initialization",
                     "Failed to initialize notes view", e);
-            clearNotesState(); // Ensure clean state on error
+            showEmptyState(); // ✅ TAMBAH
         }
     }
 
@@ -576,21 +572,19 @@ public class NotesController {
         }
     }
 
-    private void clearNotesState() {
-        // Clear notes list
+    // ✅ UBAH NAMA dari clearNotesState() ke showEmptyState()
+    private void showEmptyState() {
         if (notesList != null) {
             notesList.getItems().clear();
-            Label emptyLabel = new Label("No notes yet. Create your first note to get started!");
+            Label emptyLabel = new Label("📝 Create your first note to get started!");
             emptyLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px; -fx-padding: 20;");
             notesList.setPlaceholder(emptyLabel);
         }
 
-        // Clear editor
         if (noteEditor != null) {
             noteEditor.setHtmlText("");
         }
 
-        // Clear fields
         if (noteTitleField != null) {
             noteTitleField.clear();
         }
@@ -598,28 +592,23 @@ public class NotesController {
             tagsField.clear();
         }
 
-        // Reset word count
         if (wordCountLabel != null) {
             wordCountLabel.setText("Words: 0 | Characters: 0");
         }
 
-        // Reset last saved label
         if (lastSavedLabel != null) {
-            lastSavedLabel.setText("No changes to save");
+            lastSavedLabel.setText("Ready to create your first note");
         }
     }
 
     private void loadNotes() {
         if (notesService == null) {
             System.err.println("Notes service not available");
+            showEmptyState(); // ✅ UBAH
             return;
         }
 
         try {
-            // Start with clean state
-            clearNotesState();
-
-            // Load notes asynchronously
             CompletableFuture.supplyAsync(() -> {
                 try {
                     int userId = UserSession.getInstance().getCurrentUser().getId();
@@ -635,17 +624,20 @@ public class NotesController {
                             if (!notes.isEmpty()) {
                                 notesList.getItems().setAll(notes);
                                 System.out.println("✅ Notes loaded successfully: " + notes.size() + " notes");
+                            } else {
+                                // ✅ TAMBAH: Show empty state untuk user baru
+                                showEmptyState();
                             }
-                            // Empty state is already set by clearNotesState()
                         }
                     } catch (Exception e) {
                         ErrorHandler.handleError("Notes Loading", "Failed to display loaded notes", e);
-                        clearNotesState(); // Ensure clean state on error
+                        showEmptyState(); // ✅ TAMBAH
                     }
                 });
             });
         } catch (Exception e) {
             ErrorHandler.handleError("Notes Loading", "Failed to load notes", e);
+            showEmptyState(); // ✅ TAMBAH
         }
     }
 

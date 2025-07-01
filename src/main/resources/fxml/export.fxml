@@ -10,7 +10,7 @@
       <!-- Header -->
       <HBox alignment="CENTER_LEFT">
          <children>
-            <Label styleClass="card-title" text="Export & Backup">
+            <Label styleClass="card-title" text="Export And Backup">
                <font>
                   <Font name="System Bold" size="24.0" />
                </font>
