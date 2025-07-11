@@ -5,6 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
 
 <BorderPane fx:id="dashboardContainer" prefHeight="800.0" prefWidth="1200.0" styleClass="dashboard-container" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.focusbuddy.controllers.DashboardController">
 
@@ -17,7 +18,12 @@
                   <StackPane>
                      <children>
                         <Circle radius="16.0" styleClass="logo-circle-2" />
-                        <Label style="-fx-font-size: 16px;" text="🎯" />
+                        <!-- ✅ UPDATED: Logo Image instead of emoji -->
+                        <ImageView fitHeight="20.0" fitWidth="20.0" preserveRatio="true" styleClass="app-logo-small">
+                           <image>
+                              <Image url="@../images/icon.png" />
+                           </image>
+                        </ImageView>
                      </children>
                   </StackPane>
                   <VBox spacing="1.0">
@@ -51,7 +57,7 @@
       <VBox fx:id="sidebar" maxWidth="240.0" minWidth="200.0" prefWidth="220.0" styleClass="sidebar">
          <children>
             <!-- User Profile Section -->
-            <VBox alignment="CENTER" spacing="10.0" styleClass="user-profile-section">
+            <VBox fx:id="userProfileSection" alignment="CENTER" spacing="10.0" styleClass="user-profile-section">
                <children>
                   <StackPane>
                      <children>
@@ -276,13 +282,15 @@
                                                    </children>
                                                 </VBox>
                                                 <Region HBox.hgrow="ALWAYS" />
-                                                <Button styleClass="link-button" text="View All" />
+                                                <!-- ✅ ADDED fx:id -->
+                                                <Button fx:id="viewAllTasksBtn" styleClass="link-button" text="View All" />
                                              </children>
                                           </HBox>
 
                                           <VBox fx:id="tasksList" spacing="8.0" />
 
-                                          <Button maxWidth="Infinity" styleClass="add-button" text="+ Add New Task" />
+                                          <!-- ✅ ADDED fx:id -->
+                                          <Button fx:id="addNewTaskBtn" maxWidth="Infinity" styleClass="add-button" text="+ Add New Task" />
                                        </children>
                                     </VBox>
 
@@ -295,10 +303,11 @@
 
                                           <GridPane hgap="10.0" vgap="10.0">
                                              <children>
-                                                <Button prefHeight="45.0" prefWidth="110.0" styleClass="quick-action-button" text="📝 New Note" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                                                <Button prefHeight="45.0" prefWidth="110.0" styleClass="quick-action-button" text="🎯 Set Goal" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                                                <Button prefHeight="45.0" prefWidth="110.0" styleClass="quick-action-button" text="😊 Log Mood" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                                                <Button prefHeight="45.0" prefWidth="110.0" styleClass="quick-action-button" text="💾 Export" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <!-- ✅ ADDED fx:id for all quick action buttons -->
+                                                <Button fx:id="quickNewNoteBtn" prefHeight="45.0" prefWidth="110.0" styleClass="quick-action-button" text="📝 New Note" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                <Button fx:id="quickSetGoalBtn" prefHeight="45.0" prefWidth="110.0" styleClass="quick-action-button" text="🎯 Set Goal" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                                <Button fx:id="quickLogMoodBtn" prefHeight="45.0" prefWidth="110.0" styleClass="quick-action-button" text="😊 Log Mood" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                <Button fx:id="quickExportBtn" prefHeight="45.0" prefWidth="110.0" styleClass="quick-action-button" text="💾 Export" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                              </children>
                                              <columnConstraints>
                                                 <ColumnConstraints />
@@ -386,6 +395,9 @@
                                                 <Label styleClass="card-title-large" text="Recent Activity">
                                                    <font><Font name="System Bold" size="13.0" /></font>
                                                 </Label>
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <!-- ✅ ADDED View All Activities button with fx:id -->
+                                                <Button fx:id="viewAllActivitiesBtn" styleClass="link-button" text="View All" />
                                              </children>
                                           </HBox>
 

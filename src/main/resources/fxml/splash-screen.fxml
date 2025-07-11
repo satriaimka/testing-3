@@ -5,6 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.shape.*?>
+<?import javafx.scene.image.*?>
 
 <StackPane fx:id="splashContainer" styleClass="splash-container" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.focusbuddy.controllers.SplashController">
     <children>
@@ -23,11 +24,12 @@
                                 <Circle fx:id="logoCircle1" radius="60.0" styleClass="logo-circle-1" />
                                 <Circle fx:id="logoCircle2" radius="45.0" styleClass="logo-circle-2" />
                                 <Circle fx:id="logoCircle3" radius="30.0" styleClass="logo-circle-3" />
-                                <Label text="🎯" styleClass="logo-emoji">
-                                    <font>
-                                        <Font size="36.0" />
-                                    </font>
-                                </Label>
+                                <!-- ✅ UPDATED: Logo Image instead of emoji -->
+                                <ImageView fitHeight="48.0" fitWidth="48.0" preserveRatio="true" styleClass="app-logo-large">
+                                    <image>
+                                        <Image url="@../images/icon.png" />
+                                    </image>
+                                </ImageView>
                             </children>
                         </StackPane>
 

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+
+<!--
+🔄 IMPROVED: Scrollable Profile Dialog
+PERBAIKAN: Menambahkan ScrollPane dan mengatur tinggi yang lebih fleksibel
+-->
+
+<VBox fx:id="profileContainer" alignment="CENTER"
+      maxHeight="600.0" maxWidth="480.0"
+      minHeight="400.0" minWidth="450.0"
+      prefHeight="580.0" prefWidth="460.0"
+      spacing="0.0" styleClass="profile-dialog-container"
+      xmlns="http://javafx.com/javafx/17.0.12"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.focusbuddy.controllers.ProfileDialogController">
+
+    <children>
+        <!-- HEADER TETAP (TIDAK DI-SCROLL) -->
+        <VBox alignment="CENTER" spacing="15.0" styleClass="profile-header-section">
+            <children>
+                <!-- Avatar dengan inisial -->
+                <StackPane>
+                    <children>
+                        <Circle fx:id="profileAvatarCircle" radius="35.0" styleClass="profile-avatar-large" />
+                        <Label fx:id="userInitialsLabel" style="-fx-font-size: 22px; -fx-font-weight: bold;"
+                               styleClass="profile-initials" text="JD" />
+                    </children>
+                </StackPane>
+
+                <!-- Info dasar user -->
+                <VBox alignment="CENTER" spacing="2.0">
+                    <children>
+                        <Label fx:id="userFullNameLabel" styleClass="profile-full-name" text="John Doe">
+                            <font><Font name="System Bold" size="18.0" /></font>
+                        </Label>
+                        <Label fx:id="userUsernameLabel" styleClass="profile-username" text="@johndoe">
+                            <font><Font size="13.0" /></font>
+                        </Label>
+                        <Label fx:id="userJoinDateLabel" styleClass="profile-join-date" text="Joined 3 months ago">
+                            <font><Font size="11.0" /></font>
+                        </Label>
+                    </children>
+                </VBox>
+            </children>
+            <padding><Insets bottom="8.0" left="20.0" right="20.0" top="15.0" /></padding>
+        </VBox>
+
+        <!-- SCROLLABLE CONTENT AREA -->
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    styleClass="profile-scroll-pane" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox spacing="12.0" styleClass="profile-scrollable-content">
+                    <children>
+
+                        <!-- BAGIAN STATISTIK -->
+                        <VBox spacing="10.0" styleClass="profile-stats-section">
+                            <children>
+                                <Label styleClass="section-title" text="📊 Your Progress">
+                                    <font><Font name="System Bold" size="13.0" /></font>
+                                </Label>
+
+                                <HBox spacing="12.0">
+                                    <children>
+                                        <!-- Statistik Tasks -->
+                                        <VBox alignment="CENTER" spacing="4.0" styleClass="stat-card-profile" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label fx:id="tasksStatLabel" styleClass="stat-number-profile" text="24">
+                                                    <font><Font name="System Bold" size="16.0" /></font>
+                                                </Label>
+                                                <Label styleClass="stat-label-profile" text="Tasks">
+                                                    <font><Font size="9.0" /></font>
+                                                </Label>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Statistik Focus Time -->
+                                        <VBox alignment="CENTER" spacing="4.0" styleClass="stat-card-profile" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label fx:id="focusTimeStatLabel" styleClass="stat-number-profile" text="12h">
+                                                    <font><Font name="System Bold" size="16.0" /></font>
+                                                </Label>
+                                                <Label styleClass="stat-label-profile" text="Focus Time">
+                                                    <font><Font size="9.0" /></font>
+                                                </Label>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Statistik Goals -->
+                                        <VBox alignment="CENTER" spacing="4.0" styleClass="stat-card-profile" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label fx:id="goalsStatLabel" styleClass="stat-number-profile" text="8/10">
+                                                    <font><Font name="System Bold" size="16.0" /></font>
+                                                </Label>
+                                                <Label styleClass="stat-label-profile" text="Goals">
+                                                    <font><Font size="9.0" /></font>
+                                                </Label>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                            <padding><Insets bottom="8.0" left="15.0" right="15.0" top="8.0" /></padding>
+                        </VBox>
+
+                        <!-- BAGIAN EDIT PROFIL -->
+                        <VBox spacing="12.0" styleClass="profile-edit-section">
+                            <children>
+                                <Label styleClass="section-title" text="✏️ Edit Profile">
+                                    <font><Font name="System Bold" size="13.0" /></font>
+                                </Label>
+
+                                <!-- Field Nama Lengkap -->
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label styleClass="field-label" text="Full Name">
+                                            <font><Font name="System Bold" size="11.0" /></font>
+                                        </Label>
+                                        <TextField fx:id="fullNameField" promptText="Enter your full name"
+                                                   styleClass="profile-input-field">
+                                            <font><Font size="12.0" /></font>
+                                        </TextField>
+                                    </children>
+                                </VBox>
+
+                                <!-- Field Email -->
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label styleClass="field-label" text="Email Address">
+                                            <font><Font name="System Bold" size="11.0" /></font>
+                                        </Label>
+                                        <TextField fx:id="emailField" promptText="Enter your email address"
+                                                   styleClass="profile-input-field">
+                                            <font><Font size="12.0" /></font>
+                                        </TextField>
+                                    </children>
+                                </VBox>
+
+                                <!-- Tombol Simpan Profil -->
+                                <Button fx:id="saveProfileBtn" maxWidth="Infinity" styleClass="profile-save-btn"
+                                        text="💾 Save Profile Changes">
+                                    <font><Font name="System Bold" size="11.0" /></font>
+                                </Button>
+                            </children>
+                            <padding><Insets bottom="8.0" left="15.0" right="15.0" top="8.0" /></padding>
+                        </VBox>
+
+                        <!-- BAGIAN GANTI PASSWORD -->
+                        <VBox spacing="12.0" styleClass="profile-password-section">
+                            <children>
+                                <Label styleClass="section-title" text="🔒 Change Password">
+                                    <font><Font name="System Bold" size="13.0" /></font>
+                                </Label>
+
+                                <!-- Field Password Lama -->
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label styleClass="field-label" text="Current Password">
+                                            <font><Font name="System Bold" size="11.0" /></font>
+                                        </Label>
+                                        <PasswordField fx:id="currentPasswordField" promptText="Enter current password"
+                                                       styleClass="profile-input-field">
+                                            <font><Font size="12.0" /></font>
+                                        </PasswordField>
+                                    </children>
+                                </VBox>
+
+                                <!-- Field Password Baru -->
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label styleClass="field-label" text="New Password">
+                                            <font><Font name="System Bold" size="11.0" /></font>
+                                        </Label>
+                                        <PasswordField fx:id="newPasswordField" promptText="Enter new password (min 6 characters)"
+                                                       styleClass="profile-input-field">
+                                            <font><Font size="12.0" /></font>
+                                        </PasswordField>
+                                    </children>
+                                </VBox>
+
+                                <!-- Field Konfirmasi Password Baru -->
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label styleClass="field-label" text="Confirm New Password">
+                                            <font><Font name="System Bold" size="11.0" /></font>
+                                        </Label>
+                                        <PasswordField fx:id="confirmPasswordField" promptText="Confirm new password"
+                                                       styleClass="profile-input-field">
+                                            <font><Font size="12.0" /></font>
+                                        </PasswordField>
+                                    </children>
+                                </VBox>
+
+                                <!-- Tombol Ganti Password -->
+                                <Button fx:id="changePasswordBtn" maxWidth="Infinity" styleClass="profile-password-btn"
+                                        text="🔑 Change Password">
+                                    <font><Font name="System Bold" size="11.0" /></font>
+                                </Button>
+                            </children>
+                            <padding><Insets bottom="15.0" left="15.0" right="15.0" top="8.0" /></padding>
+                        </VBox>
+
+                        <!-- Label Status/Pesan -->
+                        <Label fx:id="statusLabel" styleClass="profile-status-label" visible="false">
+                            <font><Font size="10.0" /></font>
+                        </Label>
+
+                    </children>
+                    <padding><Insets bottom="15.0" left="5.0" right="5.0" top="5.0" /></padding>
+                </VBox>
+            </content>
+        </ScrollPane>
+
+        <!-- FOOTER TETAP (TIDAK DI-SCROLL) -->
+        <HBox alignment="CENTER" spacing="10.0" styleClass="profile-actions-section">
+            <children>
+                <Button fx:id="closeBtn" styleClass="profile-close-btn" text="Close">
+                    <font><Font name="System Bold" size="11.0" /></font>
+                </Button>
+            </children>
+            <padding><Insets bottom="15.0" left="20.0" right="20.0" top="10.0" /></padding>
+        </HBox>
+
+    </children>
+</VBox>

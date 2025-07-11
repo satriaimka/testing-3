@@ -3,6 +3,7 @@ package com.focusbuddy.controllers;
 import com.focusbuddy.models.Task;
 import com.focusbuddy.services.ActivityService;
 import com.focusbuddy.models.ActivityItem;
+import com.focusbuddy.models.User;
 import com.focusbuddy.services.PomodoroTimer;
 import com.focusbuddy.services.TaskService;
 import com.focusbuddy.services.MoodService;
@@ -11,6 +12,11 @@ import com.focusbuddy.utils.ThemeManager;
 import com.focusbuddy.utils.UserSession;
 import com.focusbuddy.utils.NotificationManager;
 import com.focusbuddy.utils.ErrorHandler;
+import com.focusbuddy.models.RegularUser;
+import com.focusbuddy.services.UserService;
+import com.focusbuddy.controllers.ProfileDialogController;
+import javafx.stage.Modality;
+import javafx.animation.ScaleTransition;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -47,6 +53,17 @@ public class DashboardController {
     @FXML private Button goalsBtn;
     @FXML private Button exportBtn;
 
+    // ✅ NEW: Dashboard action buttons
+    @FXML private Button viewAllTasksBtn;
+    @FXML private Button addNewTaskBtn;
+    @FXML private Button viewAllActivitiesBtn;
+
+    // ✅ NEW: Quick action buttons
+    @FXML private Button quickNewNoteBtn;
+    @FXML private Button quickSetGoalBtn;
+    @FXML private Button quickLogMoodBtn;
+    @FXML private Button quickExportBtn;
+
     // Dashboard content elements
     @FXML private Label timerDisplay;
     @FXML private Button startTimerBtn;
@@ -73,6 +90,8 @@ public class DashboardController {
     @FXML private ProgressBar todayTasksProgress;
     @FXML private ProgressBar todayFocusProgress;
     @FXML private VBox recentActivityContainer;
+    @FXML private VBox userProfileSection; // Reference ke bagian profile di sidebar
+
 
     private PomodoroTimer pomodoroTimer;
     private TaskService taskService;
@@ -81,6 +100,7 @@ public class DashboardController {
     private String currentView = "dashboard";
     private Node dashboardContent;
     private ActivityService activityService;
+    private UserService userService; // Service untuk operasi user
 
     @FXML
     private void initialize() {
@@ -98,6 +118,14 @@ public class DashboardController {
 
             // Set up navigation with error handling
             setupNavigationSafely();
+
+            // ✅ NEW: Set up dashboard action buttons
+            setupDashboardActionButtons();
+
+            // ✅ NEW: Set up quick action buttons
+            setupQuickActionButtons();
+
+            setupUserProfileSection();
 
             // Set up theme toggle with error handling
             setupThemeToggleSafely();
@@ -129,13 +157,343 @@ public class DashboardController {
         }
     }
 
+    // ✅ NEW: Setup dashboard action buttons
+    private void setupDashboardActionButtons() {
+        try {
+            if (viewAllTasksBtn != null) {
+                viewAllTasksBtn.setOnAction(e -> handleViewAllTasks());
+                addButtonHoverEffect(viewAllTasksBtn);
+            }
+
+            if (addNewTaskBtn != null) {
+                addNewTaskBtn.setOnAction(e -> handleAddNewTask());
+                addButtonHoverEffect(addNewTaskBtn);
+            }
+
+            if (viewAllActivitiesBtn != null) {
+                viewAllActivitiesBtn.setOnAction(e -> handleViewAllActivities());
+                addButtonHoverEffect(viewAllActivitiesBtn);
+            }
+
+            System.out.println("✅ Dashboard action buttons setup completed");
+        } catch (Exception e) {
+            ErrorHandler.handleError("Dashboard Actions Setup", "Failed to setup dashboard action buttons", e);
+        }
+    }
+
+    // ✅ NEW: Setup quick action buttons
+    private void setupQuickActionButtons() {
+        try {
+            if (quickNewNoteBtn != null) {
+                quickNewNoteBtn.setOnAction(e -> handleQuickNewNote());
+                addButtonHoverEffect(quickNewNoteBtn);
+            }
+
+            if (quickSetGoalBtn != null) {
+                quickSetGoalBtn.setOnAction(e -> handleQuickSetGoal());
+                addButtonHoverEffect(quickSetGoalBtn);
+            }
+
+            if (quickLogMoodBtn != null) {
+                quickLogMoodBtn.setOnAction(e -> handleQuickLogMood());
+                addButtonHoverEffect(quickLogMoodBtn);
+            }
+
+            if (quickExportBtn != null) {
+                quickExportBtn.setOnAction(e -> handleQuickExport());
+                addButtonHoverEffect(quickExportBtn);
+            }
+
+            System.out.println("✅ Quick action buttons setup completed");
+        } catch (Exception e) {
+            ErrorHandler.handleError("Quick Actions Setup", "Failed to setup quick action buttons", e);
+        }
+    }
+
+    // ✅ NEW: Handle View All Tasks
+    private void handleViewAllTasks() {
+        try {
+            System.out.println("🔍 Navigate to All Tasks view");
+
+            // Add button click animation
+            addButtonClickAnimation(viewAllTasksBtn);
+
+            // Navigate to tasks view
+            showTasks();
+
+            // Show feedback
+            NotificationManager.getInstance().showNotification(
+                    "Navigation",
+                    "Showing all your tasks 📋",
+                    NotificationManager.NotificationType.INFO
+            );
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("View All Tasks", "Failed to navigate to tasks view", e);
+        }
+    }
+
+    // ✅ NEW: Handle Add New Task
+    private void handleAddNewTask() {
+        try {
+            System.out.println("➕ Navigate to create new task");
+
+            // Add button click animation
+            addButtonClickAnimation(addNewTaskBtn);
+
+            // Navigate to tasks view (which allows creating new tasks)
+            showTasks();
+
+            // Show feedback with tips
+            NotificationManager.getInstance().showNotification(
+                    "Create Task",
+                    "Ready to add a new task! 📝\nTip: Be specific and set a due date",
+                    NotificationManager.NotificationType.SUCCESS
+            );
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("Add New Task", "Failed to navigate to task creation", e);
+        }
+    }
+
+    // ✅ NEW: Handle View All Activities
+    private void handleViewAllActivities() {
+        try {
+            System.out.println("📊 Show expanded activity view");
+
+            // Add button click animation
+            addButtonClickAnimation(viewAllActivitiesBtn);
+
+            // For now, show a comprehensive activity summary
+            showExpandedActivitySummary();
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("View All Activities", "Failed to show activity summary", e);
+        }
+    }
+
+    // ✅ NEW: Handle Quick New Note
+    private void handleQuickNewNote() {
+        try {
+            System.out.println("📝 Quick action: Create new note");
+
+            // Add button click animation
+            addButtonClickAnimation(quickNewNoteBtn);
+
+            // Navigate to notes view
+            showNotes();
+
+            // Show feedback
+            NotificationManager.getInstance().showNotification(
+                    "Quick Note",
+                    "Ready to capture your thoughts! ✨",
+                    NotificationManager.NotificationType.INFO
+            );
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("Quick New Note", "Failed to navigate to notes", e);
+        }
+    }
+
+    // ✅ NEW: Handle Quick Set Goal
+    private void handleQuickSetGoal() {
+        try {
+            System.out.println("🎯 Quick action: Set new goal");
+
+            // Add button click animation
+            addButtonClickAnimation(quickSetGoalBtn);
+
+            // Navigate to goals view
+            showGoals();
+
+            // Show feedback with motivation
+            NotificationManager.getInstance().showNotification(
+                    "Set Goal",
+                    "Time to set an ambitious goal! 🚀\nRemember: dreams become goals with deadlines",
+                    NotificationManager.NotificationType.SUCCESS
+            );
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("Quick Set Goal", "Failed to navigate to goals", e);
+        }
+    }
+
+    // ✅ NEW: Handle Quick Log Mood
+    private void handleQuickLogMood() {
+        try {
+            System.out.println("😊 Quick action: Log mood");
+
+            // Add button click animation
+            addButtonClickAnimation(quickLogMoodBtn);
+
+            // Navigate to mood tracker
+            showMoodTracker();
+
+            // Show feedback
+            NotificationManager.getInstance().showNotification(
+                    "Mood Check",
+                    "How are you feeling today? 🌈\nTracking mood helps build self-awareness",
+                    NotificationManager.NotificationType.INFO
+            );
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("Quick Log Mood", "Failed to navigate to mood tracker", e);
+        }
+    }
+
+    // ✅ NEW: Handle Quick Export
+    private void handleQuickExport() {
+        try {
+            System.out.println("💾 Quick action: Export data");
+
+            // Add button click animation
+            addButtonClickAnimation(quickExportBtn);
+
+            // Navigate to export view
+            showExport();
+
+            // Show feedback
+            NotificationManager.getInstance().showNotification(
+                    "Export Data",
+                    "Backup and export your productivity data 📦",
+                    NotificationManager.NotificationType.INFO
+            );
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("Quick Export", "Failed to navigate to export", e);
+        }
+    }
+
+    // ✅ NEW: Show expanded activity summary
+    private void showExpandedActivitySummary() {
+        try {
+            int userId = UserSession.getInstance().getCurrentUser().getId();
+
+            // Get comprehensive activity data
+            CompletableFuture.supplyAsync(() -> {
+                try {
+                    return activityService.getRecentActivities(userId, 20); // Get more activities
+                } catch (Exception e) {
+                    System.err.println("Error loading extended activities: " + e.getMessage());
+                    return List.<ActivityItem>of();
+                }
+            }).thenAccept(activities -> {
+                Platform.runLater(() -> {
+                    try {
+                        showActivitySummaryDialog(activities);
+                    } catch (Exception e) {
+                        ErrorHandler.handleError("Activity Summary", "Failed to display activity summary", e);
+                    }
+                });
+            });
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("Expanded Activity", "Failed to load expanded activity view", e);
+        }
+    }
+
+    // ✅ NEW: Show activity summary dialog
+    private void showActivitySummaryDialog(List<ActivityItem> activities) {
+        try {
+            Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+            dialog.setTitle("Recent Activity Summary");
+            dialog.setHeaderText("Your productivity journey 📈");
+
+            // Create scrollable content
+            VBox content = new VBox(10);
+            content.setPrefWidth(500);
+            content.setPrefHeight(400);
+
+            if (activities.isEmpty()) {
+                Label emptyLabel = new Label("No recent activities found.\nStart being productive to see your journey here! 🌟");
+                emptyLabel.setStyle("-fx-font-size: 14px; -fx-text-alignment: center;");
+                content.getChildren().add(emptyLabel);
+            } else {
+                // Activity summary
+                Label summaryLabel = new Label("📊 Summary: " + activities.size() + " recent activities");
+                summaryLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+                content.getChildren().add(summaryLabel);
+
+                // Add separator
+                content.getChildren().add(new Separator());
+
+                // Activity list
+                ScrollPane scrollPane = new ScrollPane();
+                VBox activitiesBox = new VBox(8);
+
+                for (ActivityItem activity : activities) {
+                    HBox activityRow = new HBox(10);
+                    activityRow.setStyle("-fx-padding: 8; -fx-background-color: #f8f9fa; -fx-background-radius: 4;");
+
+                    Label iconLabel = new Label(activity.getIcon());
+                    iconLabel.setStyle("-fx-font-size: 14px;");
+
+                    VBox activityInfo = new VBox(2);
+                    Label titleLabel = new Label(activity.getTitle());
+                    titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
+
+                    Label timeLabel = new Label(activity.getTimeAgo());
+                    timeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: gray;");
+
+                    activityInfo.getChildren().addAll(titleLabel, timeLabel);
+                    activityRow.getChildren().addAll(iconLabel, activityInfo);
+
+                    activitiesBox.getChildren().add(activityRow);
+                }
+
+                scrollPane.setContent(activitiesBox);
+                scrollPane.setFitToWidth(true);
+                scrollPane.setPrefHeight(300);
+                content.getChildren().add(scrollPane);
+            }
+
+            // Set dialog content
+            dialog.getDialogPane().setContent(content);
+
+            // Apply current theme
+            try {
+                if (ThemeManager.getInstance().getCurrentTheme() != null) {
+                    String cssPath = "/css/" + ThemeManager.getInstance().getCurrentTheme().getCssFile();
+                    dialog.getDialogPane().getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+                }
+            } catch (Exception e) {
+                // Ignore styling errors
+            }
+
+            dialog.showAndWait();
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("Activity Dialog", "Failed to show activity summary dialog", e);
+        }
+    }
+
+    // ✅ NEW: Add button click animation
+    private void addButtonClickAnimation(Button button) {
+        try {
+            if (button != null) {
+                // Quick scale animation to show button was clicked
+                ScaleTransition clickAnimation = new ScaleTransition(Duration.millis(100), button);
+                clickAnimation.setFromX(1.0);
+                clickAnimation.setFromY(1.0);
+                clickAnimation.setToX(0.95);
+                clickAnimation.setToY(0.95);
+                clickAnimation.setCycleCount(2);
+                clickAnimation.setAutoReverse(true);
+                clickAnimation.play();
+            }
+        } catch (Exception e) {
+            // Ignore animation errors
+        }
+    }
+
     private void initializeServices() {
         try {
             taskService = new TaskService();
             moodService = new MoodService();
             goalsService = new GoalsService();
             pomodoroTimer = new PomodoroTimer();
-            activityService = new ActivityService(); // ✅ TAMBAH INI
+            activityService = new ActivityService();
+            userService = new UserService(); // ✅ TAMBAH BARIS INI
             System.out.println("✅ Services initialized successfully");
         } catch (Exception e) {
             ErrorHandler.handleError("Service Initialization",
@@ -145,7 +503,8 @@ public class DashboardController {
             if (moodService == null) moodService = new MoodService();
             if (goalsService == null) goalsService = new GoalsService();
             if (pomodoroTimer == null) pomodoroTimer = new PomodoroTimer();
-            if (activityService == null) activityService = new ActivityService(); // ✅ TAMBAH INI
+            if (activityService == null) activityService = new ActivityService();
+            if (userService == null) userService = new UserService(); // ✅ TAMBAH BARIS INI
         }
     }
 
@@ -764,6 +1123,8 @@ public class DashboardController {
             ErrorHandler.handleError("Dashboard Data", "Failed to load dashboard data", e);
             clearDashboardStats();
         }
+
+        updateUserProfileDisplay();
     }
 
     // ✅ UPDATE STATISTICS WITH REAL DATA FROM DATABASE
@@ -1122,12 +1483,8 @@ public class DashboardController {
                     Label viewAllLabel = new Label("View all activities (" + activities.size() + ")");
                     viewAllLabel.setStyle("-fx-text-fill: #667eea; -fx-font-size: 10px; -fx-padding: 8 0 0 0; -fx-cursor: hand; -fx-underline: true;");
                     viewAllLabel.setOnMouseClicked(e -> {
-                        // TODO: Navigate to full activity view or expand
-                        NotificationManager.getInstance().showNotification(
-                                "Activities",
-                                "Full activity view coming soon!",
-                                NotificationManager.NotificationType.INFO
-                        );
+                        // ✅ UPDATED: Navigate to actual view all activities
+                        handleViewAllActivities();
                     });
                     recentActivityContainer.getChildren().add(viewAllLabel);
                 }
@@ -1637,6 +1994,230 @@ public class DashboardController {
 
         } catch (Exception e) {
             ErrorHandler.handleError("Navigation", "Failed to navigate to login", e);
+        }
+    }
+
+    private void setupUserProfileSection() {
+        try {
+            // Update tampilan profile dengan data user
+            updateUserProfileDisplay();
+
+            // Setup click handler yang aman
+            if (userProfileSection != null) {
+                // Gunakan method yang aman tanpa animasi
+                userProfileSection.setOnMouseClicked(e -> handleProfileClickSimple());
+
+                // Tambahkan visual feedback sederhana
+                userProfileSection.setOnMouseEntered(e -> {
+                    userProfileSection.getStyleClass().add("profile-hover");
+                });
+
+                userProfileSection.setOnMouseExited(e -> {
+                    userProfileSection.getStyleClass().remove("profile-hover");
+                });
+
+                System.out.println("✅ User profile section setup completed (safe mode)");
+            }
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("Profile Setup", "Failed to setup user profile section", e);
+        }
+    }
+
+    /**
+     * ✅ TAMBAH METHOD INI - Update tampilan profile dengan data user real
+     */
+    private void updateUserProfileDisplay() {
+        try {
+            User currentUser = UserSession.getInstance().getCurrentUser();
+            if (currentUser == null) {
+                System.out.println("⚠️ No current user found");
+                return;
+            }
+
+            // Cari label profile name di sidebar
+            Label profileNameLabel = findLabelInSidebar(".profile-name");
+            if (profileNameLabel != null) {
+                String displayName = currentUser.getFullName() != null && !currentUser.getFullName().trim().isEmpty()
+                        ? currentUser.getFullName()
+                        : currentUser.getUsername();
+                profileNameLabel.setText(displayName);
+            }
+
+            // Cari label profile level di sidebar
+            Label profileLevelLabel = findLabelInSidebar(".profile-level");
+            if (profileLevelLabel != null) {
+                if (currentUser instanceof RegularUser) {
+                    String formattedDate = ((RegularUser) currentUser).getFormattedJoinDate();
+                    profileLevelLabel.setText(formattedDate + " ⭐");
+                } else {
+                    profileLevelLabel.setText("Active Member ⭐");
+                }
+            }
+
+            System.out.println("✅ User profile display updated for: " + currentUser.getUsername());
+
+        } catch (Exception e) {
+            System.err.println("Error updating user profile display: " + e.getMessage());
+        }
+    }
+
+    /**
+     * ✅ TAMBAH METHOD INI - Handle klik pada profile section
+     */
+    private void handleProfileClick() {
+        try {
+            System.out.println("👤 Profile section clicked - Opening profile dialog");
+
+            // Langsung buka dialog tanpa animasi untuk menghindari konflik
+            Platform.runLater(() -> {
+                try {
+                    showProfileDialog();
+                } catch (Exception e) {
+                    ErrorHandler.handleError("Profile Dialog", "Failed to show profile dialog", e);
+                }
+            });
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("Profile Click", "Failed to handle profile click", e);
+        }
+    }
+
+    /**
+     * ✅ TAMBAH METHOD INI - Show dialog profile
+     */
+    private void showProfileDialog() {
+        try {
+            // Load FXML profile dialog
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/profile-dialog.fxml"));
+            VBox profileDialog = loader.load();
+
+            // Get controller
+            ProfileDialogController controller = loader.getController();
+
+            // Buat stage baru untuk dialog
+            Stage dialogStage = new Stage();
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.initOwner(dashboardContainer.getScene().getWindow());
+            dialogStage.setTitle("User Profile");
+            dialogStage.setResizable(true); // ✅ CHANGED: Allow resizing
+
+            // Get screen dimensions for responsive sizing
+            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+            double screenHeight = screenBounds.getHeight();
+            double screenWidth = screenBounds.getWidth();
+
+            // Calculate dialog size based on screen size
+            double dialogHeight = Math.min(580, screenHeight * 0.85);
+            double dialogWidth = Math.min(460, screenWidth * 0.9);
+
+            // Set minimum and maximum sizes
+            dialogStage.setMinWidth(400);
+            dialogStage.setMinHeight(350);
+            dialogStage.setMaxWidth(500);
+            dialogStage.setMaxHeight(Math.max(600, screenHeight * 0.9));
+
+            // Buat scene dengan ukuran yang responsif
+            Scene scene = new Scene(profileDialog, dialogWidth, dialogHeight);
+
+            // Apply tema yang sedang aktif
+            try {
+                ThemeManager themeManager = ThemeManager.getInstance();
+                if (themeManager.getCurrentTheme() != null) {
+                    String cssPath = "/css/" + themeManager.getCurrentTheme().getCssFile();
+                    scene.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+                }
+            } catch (Exception e) {
+                System.err.println("Warning: Could not apply theme to profile dialog: " + e.getMessage());
+            }
+
+            dialogStage.setScene(scene);
+
+            // Set dialog stage ke controller
+            controller.setDialogStage(dialogStage);
+
+            // Setup responsive dialog
+            controller.setupResponsiveDialog(dialogStage);
+
+            // Center dialog pada parent window dengan bounds checking
+            Stage parentStage = (Stage) dashboardContainer.getScene().getWindow();
+            if (parentStage != null) {
+                double centerX = parentStage.getX() + (parentStage.getWidth() - dialogWidth) / 2;
+                double centerY = parentStage.getY() + (parentStage.getHeight() - dialogHeight) / 2;
+
+                // Ensure dialog stays within screen bounds
+                centerX = Math.max(0, Math.min(centerX, screenBounds.getWidth() - dialogWidth));
+                centerY = Math.max(0, Math.min(centerY, screenBounds.getHeight() - dialogHeight));
+
+                dialogStage.setX(centerX);
+                dialogStage.setY(centerY);
+            }
+
+            // Show dialog
+            dialogStage.show();
+
+            // Refresh data user setelah dialog ditutup
+            dialogStage.setOnHidden(e -> {
+                Platform.runLater(() -> {
+                    updateUserProfileDisplay();
+                });
+            });
+
+            System.out.println("✅ Responsive profile dialog opened successfully");
+
+        } catch (Exception e) {
+            ErrorHandler.handleError("Profile Dialog", "Failed to show profile dialog", e);
+
+            // Fallback: show alert sederhana
+            Platform.runLater(() -> {
+                showFallbackProfileInfo();
+            });
+        }
+    }
+
+    /**
+     * ✅ TAMBAH METHOD INI - Fallback jika dialog gagal
+     */
+    private void showFallbackProfileInfo() {
+        Alert fallbackAlert = new Alert(Alert.AlertType.INFORMATION);
+        fallbackAlert.setTitle("User Profile");
+        fallbackAlert.setHeaderText("Profile Information");
+
+        User currentUser = UserSession.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String content = "Username: " + currentUser.getUsername() + "\n" +
+                    "Full Name: " + (currentUser.getFullName() != null ? currentUser.getFullName() : "Not set") + "\n" +
+                    "Email: " + (currentUser.getEmail() != null ? currentUser.getEmail() : "Not set");
+            fallbackAlert.setContentText(content);
+        } else {
+            fallbackAlert.setContentText("No user information available.");
+        }
+
+        fallbackAlert.showAndWait();
+    }
+
+    /**
+     * ✅ TAMBAH METHOD INI - Helper method untuk cari label di sidebar
+     */
+    private Label findLabelInSidebar(String selector) {
+        try {
+            if (sidebar != null) {
+                return (Label) sidebar.lookup(selector);
+            }
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error finding label: " + selector + " - " + e.getMessage());
+            return null;
+        }
+    }
+
+    private void handleProfileClickSimple() {
+        try {
+            System.out.println("👤 Profile section clicked - Opening profile dialog (simple)");
+            showProfileDialog();
+        } catch (Exception e) {
+            ErrorHandler.handleError("Profile Click", "Failed to handle profile click", e);
+            showFallbackProfileInfo();
         }
     }
 }

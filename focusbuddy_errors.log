@@ -1503,3 +1503,169 @@ Message: The entity name must immediately follow the '&' in the entity reference
 
 --------------------------------------------------------------------------------
 
+Jul 02, 2025 9:18:12 AM com.focusbuddy.utils.ErrorHandler initializeLogging
+INFO: ErrorHandler initialized successfully
+Jul 02, 2025 9:18:12 AM com.focusbuddy.utils.ErrorHandler logError
+SEVERE: [ERROR #1] JavaFX Application Thread at 2025-07-02 09:18:12
+Title: Login Failed
+Message: An error occurred during login
+java.lang.Exception: Database error during login
+	at focusbuddy/com.focusbuddy.controllers.LoginController.performLogin(LoginController.java:404)
+	at focusbuddy/com.focusbuddy.controllers.LoginController$1.call(LoginController.java:247)
+	at focusbuddy/com.focusbuddy.controllers.LoginController$1.call(LoginController.java:244)
+	at javafx.graphics@24.0.1/javafx.concurrent.Task$TaskCallable.call(Task.java:1388)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+Caused by: com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:175)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:64)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:825)
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:446)
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:239)
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:188)
+	at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:613)
+	at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:199)
+	at focusbuddy/com.focusbuddy.database.DatabaseManager.getConnection(DatabaseManager.java:36)
+	at focusbuddy/com.focusbuddy.controllers.LoginController.performLogin(LoginController.java:317)
+	... 5 more
+Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:62)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:105)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:150)
+	at com.mysql.cj.exceptions.ExceptionFactory.createCommunicationsException(ExceptionFactory.java:166)
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:89)
+	at com.mysql.cj.NativeSession.connect(NativeSession.java:121)
+	at com.mysql.cj.jdbc.ConnectionImpl.connectOneTryOnly(ConnectionImpl.java:945)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:815)
+	... 12 more
+Caused by: java.net.ConnectException: Connection refused: connect
+	at java.base/sun.nio.ch.Net.connect0(Native Method)
+	at java.base/sun.nio.ch.Net.connect(Net.java:535)
+	at java.base/sun.nio.ch.Net.connect(Net.java:524)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:574)
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:282)
+	at java.base/java.net.Socket.connect(Socket.java:665)
+	at com.mysql.cj.protocol.StandardSocketFactory.connect(StandardSocketFactory.java:153)
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:63)
+	... 15 more
+
+--------------------------------------------------------------------------------
+
+Jul 05, 2025 10:06:43 PM com.focusbuddy.utils.ErrorHandler initializeLogging
+INFO: ErrorHandler initialized successfully
+Jul 05, 2025 10:06:43 PM com.focusbuddy.utils.ErrorHandler logError
+SEVERE: [ERROR #1] JavaFX Application Thread at 2025-07-05 22:06:43
+Title: Profile Dialog
+Message: Failed to show profile dialog
+java.lang.IllegalStateException: showAndWait is not allowed during animation or layout processing
+	at javafx.graphics@24.0.1/javafx.stage.Stage.showAndWait(Stage.java:419)
+	at focusbuddy/com.focusbuddy.controllers.DashboardController.showProfileDialog(DashboardController.java:2135)
+	at focusbuddy/com.focusbuddy.controllers.DashboardController.lambda$handleProfileClick$0(DashboardController.java:2080)
+	at javafx.graphics@24.0.1/javafx.animation.Animation.runHandler(Animation.java:1147)
+	at javafx.graphics@24.0.1/javafx.animation.Animation.finished(Animation.java:1141)
+	at javafx.graphics@24.0.1/javafx.animation.AnimationAccessorImpl.finished(AnimationAccessorImpl.java:49)
+	at javafx.graphics@24.0.1/com.sun.scenario.animation.shared.FiniteClipEnvelope.timePulse(FiniteClipEnvelope.java:144)
+	at javafx.graphics@24.0.1/javafx.animation.Animation.doTimePulse(Animation.java:1234)
+	at javafx.graphics@24.0.1/javafx.animation.Animation$1.timePulse(Animation.java:190)
+	at javafx.graphics@24.0.1/com.sun.scenario.animation.AbstractPrimaryTimer.timePulseImpl(AbstractPrimaryTimer.java:316)
+	at javafx.graphics@24.0.1/com.sun.scenario.animation.AbstractPrimaryTimer$MainLoop.run(AbstractPrimaryTimer.java:239)
+	at javafx.graphics@24.0.1/com.sun.javafx.tk.quantum.QuantumToolkit.pulse(QuantumToolkit.java:588)
+	at javafx.graphics@24.0.1/com.sun.javafx.tk.quantum.QuantumToolkit.pulse(QuantumToolkit.java:572)
+	at javafx.graphics@24.0.1/com.sun.javafx.tk.quantum.QuantumToolkit.pulseFromQueue(QuantumToolkit.java:565)
+	at javafx.graphics@24.0.1/com.sun.javafx.tk.quantum.QuantumToolkit.lambda$runToolkit$6(QuantumToolkit.java:346)
+	at javafx.graphics@24.0.1/com.sun.glass.ui.InvokeLaterDispatcher$Future.run(InvokeLaterDispatcher.java:95)
+	at javafx.graphics@24.0.1/com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
+	at javafx.graphics@24.0.1/com.sun.glass.ui.win.WinApplication.lambda$runLoop$0(WinApplication.java:168)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+
+--------------------------------------------------------------------------------
+
+Jul 05, 2025 10:08:48 PM com.focusbuddy.utils.ErrorHandler logError
+SEVERE: [ERROR #2] JavaFX Application Thread at 2025-07-05 22:08:48
+Title: Profile Dialog
+Message: Failed to show profile dialog
+java.lang.IllegalStateException: showAndWait is not allowed during animation or layout processing
+	at javafx.graphics@24.0.1/javafx.stage.Stage.showAndWait(Stage.java:419)
+	at focusbuddy/com.focusbuddy.controllers.DashboardController.showProfileDialog(DashboardController.java:2135)
+	at focusbuddy/com.focusbuddy.controllers.DashboardController.lambda$handleProfileClick$0(DashboardController.java:2080)
+	at javafx.graphics@24.0.1/javafx.animation.Animation.runHandler(Animation.java:1147)
+	at javafx.graphics@24.0.1/javafx.animation.Animation.finished(Animation.java:1141)
+	at javafx.graphics@24.0.1/javafx.animation.AnimationAccessorImpl.finished(AnimationAccessorImpl.java:49)
+	at javafx.graphics@24.0.1/com.sun.scenario.animation.shared.FiniteClipEnvelope.timePulse(FiniteClipEnvelope.java:144)
+	at javafx.graphics@24.0.1/javafx.animation.Animation.doTimePulse(Animation.java:1234)
+	at javafx.graphics@24.0.1/javafx.animation.Animation$1.timePulse(Animation.java:190)
+	at javafx.graphics@24.0.1/com.sun.scenario.animation.AbstractPrimaryTimer.timePulseImpl(AbstractPrimaryTimer.java:316)
+	at javafx.graphics@24.0.1/com.sun.scenario.animation.AbstractPrimaryTimer$MainLoop.run(AbstractPrimaryTimer.java:239)
+	at javafx.graphics@24.0.1/com.sun.javafx.tk.quantum.QuantumToolkit.pulse(QuantumToolkit.java:588)
+	at javafx.graphics@24.0.1/com.sun.javafx.tk.quantum.QuantumToolkit.pulse(QuantumToolkit.java:572)
+	at javafx.graphics@24.0.1/com.sun.javafx.tk.quantum.QuantumToolkit.pulseFromQueue(QuantumToolkit.java:565)
+	at javafx.graphics@24.0.1/com.sun.javafx.tk.quantum.QuantumToolkit.lambda$runToolkit$6(QuantumToolkit.java:346)
+	at javafx.graphics@24.0.1/com.sun.glass.ui.InvokeLaterDispatcher$Future.run(InvokeLaterDispatcher.java:95)
+	at javafx.graphics@24.0.1/com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
+	at javafx.graphics@24.0.1/com.sun.glass.ui.win.WinApplication.lambda$runLoop$0(WinApplication.java:168)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+
+--------------------------------------------------------------------------------
+
+Jul 06, 2025 12:02:01 PM com.focusbuddy.utils.ErrorHandler initializeLogging
+INFO: ErrorHandler initialized successfully
+Jul 06, 2025 12:02:01 PM com.focusbuddy.utils.ErrorHandler logError
+SEVERE: [ERROR #1] JavaFX Application Thread at 2025-07-06 12:02:01
+Title: Login Failed
+Message: An error occurred during login
+java.lang.Exception: Database error during login
+	at focusbuddy/com.focusbuddy.controllers.LoginController.performLogin(LoginController.java:404)
+	at focusbuddy/com.focusbuddy.controllers.LoginController$1.call(LoginController.java:247)
+	at focusbuddy/com.focusbuddy.controllers.LoginController$1.call(LoginController.java:244)
+	at javafx.graphics@24.0.1/javafx.concurrent.Task$TaskCallable.call(Task.java:1388)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+Caused by: com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:175)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:64)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:825)
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:446)
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:239)
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:188)
+	at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:613)
+	at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:199)
+	at focusbuddy/com.focusbuddy.database.DatabaseManager.getConnection(DatabaseManager.java:36)
+	at focusbuddy/com.focusbuddy.controllers.LoginController.performLogin(LoginController.java:317)
+	... 5 more
+Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:62)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:105)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:150)
+	at com.mysql.cj.exceptions.ExceptionFactory.createCommunicationsException(ExceptionFactory.java:166)
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:89)
+	at com.mysql.cj.NativeSession.connect(NativeSession.java:121)
+	at com.mysql.cj.jdbc.ConnectionImpl.connectOneTryOnly(ConnectionImpl.java:945)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:815)
+	... 12 more
+Caused by: java.net.ConnectException: Connection refused: connect
+	at java.base/sun.nio.ch.Net.connect0(Native Method)
+	at java.base/sun.nio.ch.Net.connect(Net.java:535)
+	at java.base/sun.nio.ch.Net.connect(Net.java:524)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:574)
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:282)
+	at java.base/java.net.Socket.connect(Socket.java:665)
+	at com.mysql.cj.protocol.StandardSocketFactory.connect(StandardSocketFactory.java:153)
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:63)
+	... 15 more
+
+--------------------------------------------------------------------------------
+

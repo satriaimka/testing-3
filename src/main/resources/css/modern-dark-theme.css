@@ -1321,3 +1321,334 @@
 .format-btn {
     -fx-transition: -fx-scale-x 0.15s ease-out, -fx-scale-y 0.15s ease-out, -fx-effect 0.15s ease-out;
 }
+
+.profile-dialog-container {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 25, 0, 0, 8);
+    -fx-border-color: rgba(139,92,246,0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+}
+
+.profile-header-section {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(139,92,246,0.12) 0%, rgba(236,72,153,0.12) 100%);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(139,92,246,0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+}
+
+.profile-avatar-large {
+    -fx-fill: linear-gradient(from 0% 0% to 100% 100%, #8b5cf6 0%, #ec4899 100%);
+    -fx-effect: dropshadow(gaussian, rgba(139,92,246,0.4), 12, 0, 0, 4);
+}
+
+.profile-initials {
+    -fx-text-fill: #ffffff;
+}
+
+.profile-full-name {
+    -fx-text-fill: #f1f5f9;
+}
+
+.profile-username {
+    -fx-text-fill: #8b5cf6;
+}
+
+.profile-join-date {
+    -fx-text-fill: #94a3b8;
+}
+
+.profile-stats-section,
+.profile-edit-section,
+.profile-password-section {
+    -fx-background-color: #334155;
+    -fx-background-radius: 12;
+    -fx-border-color: #475569;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+}
+
+.stat-card-profile {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-border-color: #475569;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+}
+
+.stat-number-profile {
+    -fx-text-fill: #8b5cf6;
+}
+
+.stat-label-profile {
+    -fx-text-fill: #94a3b8;
+}
+
+.section-title {
+    -fx-text-fill: #f1f5f9;
+}
+
+.profile-input-field {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #475569;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 10 12 10 12;
+    -fx-text-fill: #e2e8f0;
+    -fx-prompt-text-fill: #94a3b8;
+}
+
+.profile-input-field:focused {
+    -fx-border-color: #8b5cf6;
+    -fx-background-color: #0f172a;
+}
+
+.profile-save-btn {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #10b981 0%, #059669 100%);
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.profile-save-btn:disabled {
+    -fx-background-color: #475569;
+    -fx-text-fill: #94a3b8;
+}
+
+.profile-password-btn {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #8b5cf6 0%, #7c3aed 100%);
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.profile-password-btn:disabled {
+    -fx-background-color: #475569;
+    -fx-text-fill: #94a3b8;
+}
+
+.profile-close-btn {
+    -fx-background-color: #475569;
+    -fx-text-fill: #e2e8f0;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20 10 20;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.profile-close-btn:hover {
+    -fx-background-color: #64748b;
+}
+
+.status-success {
+    -fx-text-fill: #10b981;
+    -fx-background-color: rgba(16,185,129,0.1);
+    -fx-background-radius: 6;
+    -fx-padding: 8;
+}
+
+.status-error {
+    -fx-text-fill: #ef4444;
+    -fx-background-color: rgba(239,68,68,0.1);
+    -fx-background-radius: 6;
+    -fx-padding: 8;
+}
+
+/* Make profile section clickable */
+.user-profile-section:hover {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(139,92,246,0.18) 0%, rgba(236,72,153,0.18) 100%);
+    -fx-cursor: hand;
+}
+
+.profile-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-background: transparent;
+}
+
+.profile-scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.profile-scroll-pane .content {
+    -fx-background-color: transparent;
+}
+
+.profile-scrollable-content {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* Custom ScrollBar Styling - Dark Theme */
+.profile-scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8;
+    -fx-padding: 2;
+}
+
+.profile-scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: #334155;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+.profile-scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #64748b;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+.profile-scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #8b5cf6;
+}
+
+.profile-scroll-pane .scroll-bar:vertical .increment-button,
+.profile-scroll-pane .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-pref-height: 0;
+    -fx-pref-width: 0;
+}
+
+/* Improved Dialog Container for Scrolling */
+.profile-dialog-container {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 25, 0, 0, 8);
+    -fx-border-color: rgba(139,92,246,0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+    -fx-max-height: 600;
+    -fx-pref-height: 580;
+}
+
+/* Compact Stats Cards */
+.stat-card-profile {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 6;
+    -fx-padding: 8;
+    -fx-border-color: #475569;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-min-height: 50;
+    -fx-pref-height: 55;
+}
+
+/* Compact Input Fields */
+.profile-input-field {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #475569;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 8 10 8 10;
+    -fx-text-fill: #e2e8f0;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-pref-height: 35;
+}
+
+/* Compact Buttons */
+.profile-save-btn,
+.profile-password-btn {
+    -fx-padding: 10;
+    -fx-pref-height: 38;
+    -fx-font-size: 11px;
+}
+
+/* Compact Sections */
+.profile-stats-section,
+.profile-edit-section,
+.profile-password-section {
+    -fx-background-color: #334155;
+    -fx-background-radius: 10;
+    -fx-border-color: #475569;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+}
+
+* ============================================
+RESPONSIVE SIZING
+============================================ */
+
+/* For smaller screens */
+@media screen and (max-height: 768px) {
+    .profile-dialog-container {
+        -fx-max-height: 500;
+        -fx-pref-height: 480;
+    }
+
+    .profile-header-section {
+        -fx-padding: 10 15 5 15;
+    }
+
+    .stat-card-profile {
+        -fx-min-height: 45;
+        -fx-pref-height: 50;
+        -fx-padding: 6;
+    }
+
+    .profile-input-field {
+        -fx-pref-height: 32;
+        -fx-padding: 6 8 6 8;
+    }
+
+    .profile-save-btn,
+    .profile-password-btn {
+        -fx-pref-height: 35;
+        -fx-padding: 8;
+    }
+}
+
+/* For very small screens */
+@media screen and (max-height: 600px) {
+    .profile-dialog-container {
+        -fx-max-height: 450;
+        -fx-pref-height: 430;
+    }
+}
+
+/* Logo base styles - ukuran kecil (dashboard top bar) */
+.app-logo-small {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0, 0, 2);
+    -fx-opacity: 0.95;
+}
+
+/* Logo medium size (login screen) */
+.app-logo {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 3);
+    -fx-opacity: 1.0;
+}
+
+/* Logo large size (splash screen) */
+.app-logo-large {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 12, 0, 0, 4);
+    -fx-opacity: 1.0;
+}
+
+/* Hover effects untuk logo yang bisa diklik */
+.app-logo:hover,
+.app-logo-small:hover,
+.app-logo-large:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-transition: -fx-scale-x 0.15s ease-out, -fx-scale-y 0.15s ease-out;
+}
+
+.root.dark-theme .app-logo-small {
+    -fx-effect: dropshadow(gaussian, rgba(139,92,246,0.4), 6, 0, 0, 2);
+}
+
+.root.dark-theme .app-logo {
+    -fx-effect: dropshadow(gaussian, rgba(139,92,246,0.5), 10, 0, 0, 3);
+}
+
+.root.dark-theme .app-logo-large {
+    -fx-effect: dropshadow(gaussian, rgba(139,92,246,0.6), 15, 0, 0, 4);
+}

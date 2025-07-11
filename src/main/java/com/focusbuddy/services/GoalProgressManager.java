@@ -17,19 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 🎯 GOAL PROGRESS MANAGER - Clean Version
+ * 🎯 GOAL PROGRESS MANAGER - FIXED VERSION
  *
- * Singleton class yang mengelola automatic goal progress updates
- * berdasarkan user activities seperti task completion dan focus sessions.
- *
- * Features:
- * - Auto-update goal progress when tasks completed
- * - Auto-update goal progress when focus sessions completed
- * - Observer pattern untuk notifications dan achievements
- * - Real-time goal tracking dan completion detection
+ * ✅ FIXED: Removed task completion handling to avoid double-update with database trigger
+ * ✅ FOCUS: Only handles focus sessions (no database trigger conflict)
+ * ✅ CLEAN: Simplified observer pattern for achievements only
  *
  * @author FocusBuddy Team
- * @version 2.0
+ * @version 2.1 - Fixed Double Update Bug
  */
 public class GoalProgressManager {
 
@@ -77,42 +72,24 @@ public class GoalProgressManager {
     }
 
     // ===================================================================
-    // 🎯 MAIN AUTO-PROGRESS METHODS
+    // 🚫 REMOVED: TASK COMPLETION HANDLING
     // ===================================================================
 
     /**
-     * 📋 AUTO-UPDATE: Ketika user menyelesaikan TASK
-     * Method ini dipanggil dari TaskService.updateTask()
+     * ❌ REMOVED: onTaskCompleted() method
      *
-     * @param userId ID user yang menyelesaikan task
-     * @param completedTask Task yang baru saja diselesaikan
+     * Reason: Database trigger 'update_goal_on_task_completion' already handles this
+     * automatically. Manual updates from Java code caused double-increment bug.
+     *
+     * Database trigger handles:
+     * - TASKS_COMPLETED goals update when task status changes to COMPLETED
+     * - Automatic goal completion detection
+     * - Status updates from ACTIVE to COMPLETED
      */
-    public void onTaskCompleted(int userId, Task completedTask) {
-        try {
-            System.out.println("🎯 Processing task completion for goal progress...");
-            System.out.println("   Task: " + completedTask.getTitle());
-            System.out.println("   User ID: " + userId);
 
-            // Cari semua active goals dengan type TASKS_COMPLETED
-            List<Goal> taskGoals = getActiveGoalsByType(userId, Goal.GoalType.TASKS_COMPLETED);
-
-            if (taskGoals.isEmpty()) {
-                System.out.println("   No active task completion goals found for user");
-                return;
-            }
-
-            System.out.println("   Found " + taskGoals.size() + " task completion goals to update");
-
-            // Update setiap goal yang ditemukan
-            for (Goal goal : taskGoals) {
-                updateGoalProgress(goal, 1, "task completion");
-            }
-
-        } catch (Exception e) {
-            System.err.println("❌ Error processing task completion for goals: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+    // ===================================================================
+    // 🍅 FOCUS SESSION HANDLING (NO CONFLICT)
+    // ===================================================================
 
     /**
      * 🍅 AUTO-UPDATE: Ketika user menyelesaikan FOCUS SESSION
@@ -127,6 +104,8 @@ public class GoalProgressManager {
             System.out.println("   Duration: " + durationMinutes + " minutes");
             System.out.println("   User ID: " + userId);
 
+            // ✅ SAFE: Focus sessions don't have database triggers, so no conflict
+
             // Update FOCUS_SESSIONS goals (+1 session)
             updateFocusSessionGoals(userId);
 
@@ -140,7 +119,7 @@ public class GoalProgressManager {
     }
 
     // ===================================================================
-    // 🔧 GOAL UPDATE HELPERS
+    // 🔧 GOAL UPDATE HELPERS (FOCUS SESSIONS ONLY)
     // ===================================================================
 
     /**
@@ -523,6 +502,8 @@ public class GoalProgressManager {
 
             System.out.println("✅ GoalProgressManager health check passed");
             System.out.println("   Active observers: " + observers.size());
+            System.out.println("   Task completion handling: DISABLED (handled by database trigger)");
+            System.out.println("   Focus session handling: ENABLED");
 
             return true;
 
@@ -537,10 +518,12 @@ public class GoalProgressManager {
      */
     public void printDebugInfo() {
         try {
-            System.out.println("=== GoalProgressManager Debug Info ===");
+            System.out.println("=== GoalProgressManager Debug Info (Fixed Version) ===");
             System.out.println("Instance: " + (instance != null ? "Initialized" : "Not initialized"));
             System.out.println("GoalsService: " + (goalsService != null ? "Available" : "Not available"));
             System.out.println("Observers count: " + (observers != null ? observers.size() : "null"));
+            System.out.println("Task completion handling: DISABLED (database trigger handles this)");
+            System.out.println("Focus session handling: ENABLED (no trigger conflict)");
 
             if (observers != null && !observers.isEmpty()) {
                 System.out.println("Registered observers:");
@@ -549,10 +532,63 @@ public class GoalProgressManager {
                 }
             }
 
-            System.out.println("=====================================");
+            System.out.println("======================================================");
 
         } catch (Exception e) {
             System.err.println("❌ Error printing debug info: " + e.getMessage());
+        }
+    }
+
+    // ===================================================================
+    // 🔧 MIGRATION HELPER (OPTIONAL)
+    // ===================================================================
+
+    /**
+     * ✅ OPTIONAL: Method to fix existing goals with incorrect progress
+     * Call this once to sync goals with actual task completion counts
+     */
+    public void syncTaskGoalsWithDatabase(int userId) {
+        try {
+            System.out.println("🔄 Syncing task completion goals with actual database state...");
+
+            // Get actual completed task count
+            try (Connection conn = DatabaseManager.getInstance().getConnection()) {
+                String taskQuery = "SELECT COUNT(*) as completed FROM tasks WHERE user_id = ? AND status = 'COMPLETED'";
+                PreparedStatement taskStmt = conn.prepareStatement(taskQuery);
+                taskStmt.setInt(1, userId);
+                ResultSet taskRs = taskStmt.executeQuery();
+
+                int actualCompletedTasks = 0;
+                if (taskRs.next()) {
+                    actualCompletedTasks = taskRs.getInt("completed");
+                }
+
+                System.out.println("📊 Actual completed tasks: " + actualCompletedTasks);
+
+                // Update all task completion goals
+                String updateQuery = """
+                    UPDATE goals 
+                    SET current_value = ?, 
+                        status = CASE 
+                            WHEN ? >= target_value THEN 'COMPLETED' 
+                            ELSE 'ACTIVE' 
+                        END
+                    WHERE user_id = ? 
+                    AND goal_type = 'TASKS_COMPLETED'
+                    """;
+
+                PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
+                updateStmt.setInt(1, actualCompletedTasks);
+                updateStmt.setInt(2, actualCompletedTasks);
+                updateStmt.setInt(3, userId);
+
+                int updated = updateStmt.executeUpdate();
+                System.out.println("✅ Updated " + updated + " task completion goals");
+
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Error syncing task goals: " + e.getMessage());
         }
     }
 }

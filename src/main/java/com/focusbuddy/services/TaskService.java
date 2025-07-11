@@ -2,7 +2,8 @@ package com.focusbuddy.services;
 
 import com.focusbuddy.database.DatabaseManager;
 import com.focusbuddy.models.Task;
-import com.focusbuddy.services.GoalProgressManager;
+// ❌ REMOVED: import com.focusbuddy.services.GoalProgressManager;
+// Reason: Database trigger sudah handle goal updates
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -90,16 +91,6 @@ public class TaskService {
                 }
 
                 System.out.println("✅ Task added successfully: " + task.getTitle());
-
-                // ✅ NEW: Notify goal system about new task (for goal tracking)
-                try {
-                    // Could add goal tracking for "tasks created" if needed
-                    // GoalProgressManager.getInstance().onTaskCreated(task.getUserId(), task);
-
-                } catch (Exception e) {
-                    System.err.println("⚠️ Error notifying goal system about new task: " + e.getMessage());
-                }
-
                 return true;
             }
 
@@ -113,21 +104,10 @@ public class TaskService {
 
     public boolean updateTask(Task task) {
         try (Connection conn = DatabaseManager.getInstance().getConnection()) {
-            // Store old status untuk comparison
-            Task.Status oldStatus = null;
+            // ✅ FIXED: NO MORE MANUAL GOAL UPDATES
+            // Database trigger 'update_goal_on_task_completion' will handle goal updates automatically
+            // This eliminates the double-update bug where goals were updated twice
 
-            // Get current task dari database untuk compare status
-            String selectQuery = "SELECT status FROM tasks WHERE id = ?";
-            PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
-            selectStmt.setInt(1, task.getId());
-            ResultSet rs = selectStmt.executeQuery();
-
-            if (rs.next()) {
-                oldStatus = Task.Status.valueOf(rs.getString("status"));
-            }
-            selectStmt.close();
-
-            // Update task as usual
             String query = "UPDATE tasks SET title = ?, description = ?, priority = ?, status = ?, due_date = ?, updated_at = ? WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(query);
 
@@ -150,20 +130,9 @@ public class TaskService {
             if (rowsAffected > 0) {
                 System.out.println("✅ Task updated successfully: " + task.getTitle());
 
-                // ✅ NEW: CHECK IF TASK WAS COMPLETED AND UPDATE GOALS
-                if (oldStatus != Task.Status.COMPLETED &&
-                        task.getStatus() == Task.Status.COMPLETED) {
-
-                    System.out.println("🎯 Task completed! Updating related goals...");
-
-                    try {
-                        // Update goals otomatis ketika task completed
-                        GoalProgressManager.getInstance().onTaskCompleted(task.getUserId(), task);
-
-                    } catch (Exception e) {
-                        System.err.println("⚠️ Error updating goals after task completion: " + e.getMessage());
-                        // Jangan fail task update kalau goal update error
-                    }
+                // ✅ LOG: Show goal update status
+                if (task.getStatus() == Task.Status.COMPLETED) {
+                    System.out.println("🎯 Task completed! Goal progress will be updated by database trigger.");
                 }
 
                 return true;
@@ -328,5 +297,47 @@ public class TaskService {
         }
 
         return 0;
+    }
+
+    // ✅ NEW: Method to verify goal progress sync
+    public void verifyGoalProgressSync(int userId) {
+        try (Connection conn = DatabaseManager.getInstance().getConnection()) {
+            System.out.println("🔍 Verifying goal progress sync for user: " + userId);
+
+            // Check task completion count
+            String taskQuery = "SELECT COUNT(*) as completed_tasks FROM tasks WHERE user_id = ? AND status = 'COMPLETED'";
+            PreparedStatement taskStmt = conn.prepareStatement(taskQuery);
+            taskStmt.setInt(1, userId);
+            ResultSet taskRs = taskStmt.executeQuery();
+
+            int actualCompletedTasks = 0;
+            if (taskRs.next()) {
+                actualCompletedTasks = taskRs.getInt("completed_tasks");
+            }
+
+            // Check goal progress
+            String goalQuery = "SELECT id, title, current_value, target_value FROM goals WHERE user_id = ? AND goal_type = 'TASKS_COMPLETED' AND status = 'ACTIVE'";
+            PreparedStatement goalStmt = conn.prepareStatement(goalQuery);
+            goalStmt.setInt(1, userId);
+            ResultSet goalRs = goalStmt.executeQuery();
+
+            System.out.println("📊 Completed tasks in database: " + actualCompletedTasks);
+
+            while (goalRs.next()) {
+                int goalId = goalRs.getInt("id");
+                String title = goalRs.getString("title");
+                int currentValue = goalRs.getInt("current_value");
+                int targetValue = goalRs.getInt("target_value");
+
+                System.out.println("🎯 Goal: \"" + title + "\" - Progress: " + currentValue + "/" + targetValue);
+
+                if (currentValue != actualCompletedTasks) {
+                    System.out.println("⚠️ SYNC ISSUE DETECTED! Goal progress doesn't match actual completed tasks.");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error verifying goal progress sync: " + e.getMessage());
+        }
     }
 }
